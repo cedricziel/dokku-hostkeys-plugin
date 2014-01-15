@@ -11,7 +11,7 @@ fi
 
 if [[ ! -d "$SHARED_HOSTKEYS_FOLDER/known_hosts" ]]
  then
-  mkdir -p "$SHARED_HOSTKEYS_FOLDER/known_hosts";
+  touch "$SHARED_HOSTKEYS_FOLDER/known_hosts";
 fi
 
 chown -R dokku:dokku "$DOKKU_ROOT/.hostkeys"
