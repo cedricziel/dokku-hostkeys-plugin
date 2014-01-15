@@ -190,12 +190,12 @@ delete_app_keys() {
   check_app
   check_exists
   check_install_app
-  if [[ ! -n "$3" ]]; then
+  if [[ -n "$3" ]]; then
     ssh-keygen -f "$APP_SPECIFIC_HOSTKEYS_FILE" -R "$HOSTNAME_TO_REMOVE_APP"
     rm "$APP_SPECIFIC_HOSTKEYS_FOLDER/known_hosts.old"
     echo "Deleted hostkey for $HOSTNAME_TO_REMOVE as well as the backup."
   else
-    > $SHARED_HOSTKEYS_FILE
+    > $APP_SPECIFIC_HOSTKEYS_FILE
     echo "Emptied the app specific hostkey file. Your app looses the specific keys on the next push. Make sure you add the required ones"
   fi
 }

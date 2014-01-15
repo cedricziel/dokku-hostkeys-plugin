@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+
+APP="$1"; IMAGE="app/$APP"
+APP_SPECIFIC_KEY_FOLDER="$DOKKU_ROOT/.hostkeys/$APP/.ssh"
+SHARED_KEY_FOLDER="$DOKKU_ROOT/.hostkeys/shared/.ssh"
+SOURCE_ENV_PATH="$HOME/$APP/ENV"
+echo "-----> Checking Hostkeys Plugin sanity ..."
+bash $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/install
+echo "-----> Installing Hostkeys in build environment ..."
+
+KNOWN_HOSTS_COMBINED=$(cat "$SHARED_KEY_FOLDER/known_hosts" "$APP_SPECIFIC_KEY_FOLDER/known_hosts")
+
+# 1. Create the .ssh folder
+id=$(docker run -i -a stdin $IMAGE /bin/bash -c "mkdir -p -m 700 /.ssh")
+test $(docker wait $id) -eq 0
+docker commit $id $IMAGE > /dev/null
+
+# 2. Transfer the keyfile to the container
+idWithKeys=$(echo "$KNOWN_HOSTS_COMBINED" | docker run -i -a stdin $IMAGE /bin/bash -c "cat >> /.ssh/known_hosts && chmod 644 /.ssh/known_hosts")
+test $(docker wait $idWithKeys) -eq 0
+docker commit $idWithKeys $IMAGE > /dev/null
+
+echo "-----> Done Installing Hostkeys in build environment ..."
+echo "       Added the following keys:"
+echo "       $KNOWN_HOSTS_COMBINED"
