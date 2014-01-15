@@ -55,3 +55,7 @@ hostkeys:app:add <app>                          Add a app-specific hostkey
 hostkeys:app:delete <app>                       Deletes all app-specific hostkeys
 hostkeys:app:autoadd <hostname>                 Automatically add hostkeys for a given host to the shared hostkeys
 ```
+
+License
+-------
+MIT License
