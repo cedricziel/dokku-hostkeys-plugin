@@ -14,3 +14,44 @@ Installation
 git clone https://github.com/cedricziel/dokku-hostkeys-plugin.git /var/lib/dokku/plugins/hostkeys
 dokku plugins-install
 ```
+
+Usage
+-----
+
+Use the ``dokku hostkeys`` command for further information:
+
+```
+The hostkeys plugin manages the known_hosts file for your apps.
+
+You need those known_hosts files, when you want to open a SSH connection to a foreign host,
+such as when compiling the app and pulling in dependencies.
+
+After adding hostkeys to your Dokku host/app, they will automatically be baked in on the
+next time you compile your app.
+
+There are 2 types of keys:
+1.) Shared Keys
+Shared keys are valid for all your apps on the Dokku host. You may probably want to add
+some popular hosts in there such as BitBucket, GitHub or even your private VCS that is reachable.
+
+2.) App-Level Hostkeys
+App-Level Hostkeys may be needed for external dependencies which you licensed, or that reside
+on a different host
+
+You may as well want to have a look at the dokku-deployment-keys plugin on GitHub:
+http://github.com/cedricziel/dokku-deployment-keys
+
+Projects are kept separate because they each do one different thing.
+
+Available Commands:
+-------------------
+hostkeys                                        Print an explanation (Useful to get the concept)
+hostkeys:shared:show                            Show shared hostkeys
+hostkeys:shared:add                             Add a shared hostkey
+hostkeys:shared:delete                          Deletes all shared hostkeys
+hostkeys:shared:autoadd <hostname>              Automatically add hostkeys for a given host to the shared hostkeys
+hostkeys:app:show <app>                         Show all hostkeys for a given app
+hostkeys:app:add <app>                          Add a app-specific hostkey
+hostkeys:app:delete <app>                       Deletes all app-specific hostkeys
+hostkeys:app:autoadd <hostname>                 Automatically add hostkeys for a given host to the shared hostkeys
+```
