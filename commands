@@ -25,6 +25,24 @@ print_explanation() {
     App-Level Hostkeys may be needed for external dependencies which you licensed, or that reside
     on a different host
 
+    Auto-Adding Hostkeys
+    --------------------
+    There is another possibility to add host keys, if you do not want to enter a hostkey manually:
+    You can autoadd hosts. You provide the hostname and your Dokku host will resolve it for you.
+    (THIS IS NOT A GOOD PRACTICE!)
+    You should only do this if you are 100% sure your DNS is not compromised.
+
+    $ dokku hostkeys:shared:autoadd github.com
+    This command would automatically discover the hostkeys for github.com, add it to the shared
+    known_hosts file and add it to your apps slug on recompile.
+
+    $ dokku hostkeys:shared:autoadd mycoolapp github.com
+    This command would automatically discover the hostkeys for github.com, add it to your known_hosts
+    file for the mycoolapp app and will be compiled inside the slug on recompile.
+
+    $ dokku hostkeys:shared:autoadd github.com
+    This command would automatically discover the hostkeys for github.com and add it to your apps slug.
+
     You may as well want to have a look at the dokku-deployment-keys plugin on GitHub:
     http://github.com/cedricziel/dokku-deployment-keys
 
@@ -45,7 +63,7 @@ print_help(){
     hostkeys:app:show <app>                         Show all hostkeys for a given app
     hostkeys:app:add <app>                          Add a app-specific hostkey
     hostkeys:app:delete <app>                       Deletes all app-specific hostkeys
-    hostkeys:app:autoadd <hostname>                 Automatically add hostkeys for a given host to the shared hostkeys
+    hostkeys:app:autoadd <app> <hostname>           Automatically add hostkeys for a given host to the shared hostkeys
 EOF
   return
 }
