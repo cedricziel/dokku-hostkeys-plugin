@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+
+SSH_KEYSCAN=`which ssh-keyscan`
+SHARED_HOSTKEYS_FOLDER="$DOKKU_ROOT/.hostkeys/shared/.ssh"
+
+if [[ ! -d "$SHARED_HOSTKEYS_FOLDER" ]]
+ then
+  mkdir -p "$SHARED_HOSTKEYS_FOLDER";
+fi
+
+if [[ ! -d "$SHARED_HOSTKEYS_FOLDER/known_hosts" ]]
+ then
+  mkdir -p "$SHARED_HOSTKEYS_FOLDER/known_hosts";
+fi
+
+chown -R dokku:dokku "$DOKKU_ROOT/.hostkeys"
