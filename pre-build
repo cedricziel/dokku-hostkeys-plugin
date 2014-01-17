@@ -9,18 +9,41 @@ echo "-----> Checking Hostkeys Plugin sanity ..."
 bash $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/install
 echo "-----> Installing Hostkeys in build environment ..."
 
-KNOWN_HOSTS_COMBINED=$(cat "$SHARED_KEY_FOLDER/known_hosts" "$APP_SPECIFIC_KEY_FOLDER/known_hosts")
+KNOWN_HOSTS_COMBINED=""
 
-# 1. Create the .ssh folder
-id=$(docker run -i -a stdin $IMAGE /bin/bash -c "mkdir -p -m 700 /.ssh")
-test $(docker wait $id) -eq 0
-docker commit $id $IMAGE > /dev/null
+if ([[ -f "$APP_SPECIFIC_KEY_FOLDER/known_hosts" ]]); then
+  KNOWN_HOSTS_COMBINED=$(cat "$APP_SPECIFIC_KEY_FOLDER/known_hosts")
+  echo "       App specific keys available. Adding."
+else
+  echo "       No app keys available."
+fi
 
-# 2. Transfer the keyfile to the container
-idWithKeys=$(echo "$KNOWN_HOSTS_COMBINED" | docker run -i -a stdin $IMAGE /bin/bash -c "cat >> /.ssh/known_hosts && chmod 644 /.ssh/known_hosts")
-test $(docker wait $idWithKeys) -eq 0
-docker commit $idWithKeys $IMAGE > /dev/null
+if ([[ -f "$SHARED_KEY_FOLDER/known_hosts" ]]); then
+  if ([[ -z "$KNOWN_HOSTS_COMBINED" ]]); then
+    echo "       Adding shared keys."
+    KNOWN_HOSTS_COMBINED="$KNOWN_HOSTS_COMBINED"$(cat "$SHARED_KEY_FOLDER/known_hosts")
+  else
+    echo "       Appending shared keys."
+    KNOWN_HOSTS_COMBINED="$KNOWN_HOSTS_COMBINED"$'\n'$(cat "$SHARED_KEY_FOLDER/known_hosts")
+  fi
+fi
 
-echo "-----> Done Installing Hostkeys in build environment ..."
-echo "       Added the following keys:"
-echo "       $KNOWN_HOSTS_COMBINED"
+if ([[ ! -z "$KNOWN_HOSTS_COMBINED" ]]); then
+  # 1. Create the .ssh folder
+  id=$(docker run -i -a stdin $IMAGE /bin/bash -c "mkdir -p -m 700 /app/.ssh")
+  test $(docker wait $id) -eq 0
+  docker commit $id $IMAGE > /dev/null
+
+  # 2. Transfer the keyfile to the container
+  #idWithKeys=$(echo "$KNOWN_HOSTS_COMBINED" | docker run -i -a stdin $IMAGE /bin/bash -c "cat >> /.ssh/known_hosts && chmod 644 /.ssh/known_hosts")
+  idWithKeys=$(echo -e "$KNOWN_HOSTS_COMBINED" | docker run -i -a stdin $IMAGE /bin/bash -c "cat >> /etc/ssh/ssh_known_hosts && chmod 644 /etc/ssh/ssh_known_hosts")
+  test $(docker wait $idWithKeys) -eq 0
+  docker commit $idWithKeys $IMAGE > /dev/null
+
+  echo "-----> Done Installing Hostkeys in build environment ..."
+  echo "       Added the following keys:"
+  echo "       $KNOWN_HOSTS_COMBINED"
+
+else
+  echo "       No hostkeys found. Continueing.."
+fi
