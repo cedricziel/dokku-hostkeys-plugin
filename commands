@@ -246,4 +246,7 @@ case "$1" in
   hostkeys:app:autoadd)
   autoadd_app_key
   ;;
+  help)
+    cat && print_help
+  ;;
 esac
