@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
 
-APP="$1"; IMAGE="dokku/$APP"
+APP="$1";
+
+# it will run well for both dokku and dokku-alt
+source "$(dirname $0)/../dokku_common"
+[ `declare -f -F check_app_name` ] && check_app_name "$APP" || IMAGE="dokku/$APP" 
+
 APP_SPECIFIC_KEY_FOLDER="$DOKKU_ROOT/.hostkeys/$APP/.ssh"
 SHARED_KEY_FOLDER="$DOKKU_ROOT/.hostkeys/shared/.ssh"
 SOURCE_ENV_PATH="$HOME/$APP/ENV"
