@@ -46,6 +46,10 @@ if ([[ ! -z "$KNOWN_HOSTS_COMBINED" ]]); then
   idWithKeys=$(echo -e "$KNOWN_HOSTS_COMBINED" | docker run -i -a stdin $IMAGE /bin/bash -c "cat >> /etc/ssh/ssh_known_hosts && chmod 644 /etc/ssh/ssh_known_hosts")
   test $(docker wait $idWithKeys) -eq 0
   docker commit $idWithKeys $IMAGE > /dev/null
+  
+  idWithConfig=$(echo "UserKnownHostsFile /etc/ssh/ssh_known_hosts" | docker run -i -a stdin $IMAGE /bin/bash -c "cat >> /etc/ssh/ssh_config" )
+  test $(docker wait $idWithConfig) -eq 0
+  docker commit $idWithConfig $IMAGE > /dev/null
 
   echo "-----> Done Installing Hostkeys in build environment ..."
   echo "       Added the following keys:"
