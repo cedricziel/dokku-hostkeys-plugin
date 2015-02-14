@@ -155,7 +155,7 @@ delete_shared_keys() {
 autoadd_shared_key(){
   check_install
   if [[ -n "$HOSTNAME_TO_ADD" ]]; then
-  ssh-keyscan -H "$HOSTNAME_TO_ADD" > "$SHARED_HOSTKEYS_FILE"
+  ssh-keyscan -H "$HOSTNAME_TO_ADD" >> "$SHARED_HOSTKEYS_FILE"
   echo "Added keys for $HOSTNAME_TO_ADD"
   else
   echo "Please enter the name of the host as argument"
@@ -179,7 +179,7 @@ autoadd_app_key(){
   check_exists
   check_install_app
   if [[ -n "$HOSTNAME_TO_ADD_APP" ]]; then
-  ssh-keyscan -H "$HOSTNAME_TO_ADD_APP" > "$APP_SPECIFIC_HOSTKEYS_FILE"
+  ssh-keyscan -H "$HOSTNAME_TO_ADD_APP" >> "$APP_SPECIFIC_HOSTKEYS_FILE"
   echo "Added keys for $HOSTNAME_TO_ADD_APP"
   else
   echo "Please enter the name of the host as argument"
