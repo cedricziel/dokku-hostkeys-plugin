@@ -249,4 +249,7 @@ case "$1" in
   help)
     cat && print_help
   ;;
+  *)
+    exit $DOKKU_NOT_IMPLEMENTED_EXIT
+  ;;
 esac
