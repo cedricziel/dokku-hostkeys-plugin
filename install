@@ -9,7 +9,7 @@ if [[ ! -d "$SHARED_HOSTKEYS_FOLDER" ]]
   mkdir -p "$SHARED_HOSTKEYS_FOLDER";
 fi
 
-if [[ ! -d "$SHARED_HOSTKEYS_FOLDER/known_hosts" ]]
+if [[ ! -f "$SHARED_HOSTKEYS_FOLDER/known_hosts" ]]
  then
   touch "$SHARED_HOSTKEYS_FOLDER/known_hosts";
 fi
