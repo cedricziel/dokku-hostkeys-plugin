@@ -103,16 +103,16 @@ EOF
 
 print_help(){
   cat<<EOF
-    hostkeys                                        Print an explanation (Useful to get the concept)
-    hostkeys:shared:show                            Show shared hostkeys
-    hostkeys:shared:add                             Add a shared hostkey
-    hostkeys:shared:delete                          Deletes all shared hostkeys
-    hostkeys:shared:delete <hostname>               Deletes the shared hostkeys for the given host
-    hostkeys:shared:autoadd <hostname>              Automatically add hostkeys for a given host to the shared hostkeys
-    hostkeys:app:show <app>                         Show all hostkeys for a given app
-    hostkeys:app:add <app>                          Add a app-specific hostkey
-    hostkeys:app:delete <app>                       Deletes all app-specific hostkeys
-    hostkeys:app:autoadd <app> <hostname>           Automatically add hostkeys for a given host to the shared hostkeys
+    hostkeys, Print an explanation (Useful to get the concept)
+    hostkeys:shared:show, Show shared hostkeys
+    hostkeys:shared:add, Add a shared hostkey
+    hostkeys:shared:delete, Deletes all shared hostkeys
+    hostkeys:shared:delete <hostname>, Deletes the shared hostkeys for the given host
+    hostkeys:shared:autoadd <hostname>, Automatically add hostkeys for a given host to the shared hostkeys
+    hostkeys:app:show <app>, Show all hostkeys for a given app
+    hostkeys:app:add <app>, Add a app-specific hostkey
+    hostkeys:app:delete <app>, Deletes all app-specific hostkeys
+    hostkeys:app:autoadd <app> <hostname>, Automatically add hostkeys for a given host to the shared hostkeys
 EOF
   return
 }
