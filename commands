@@ -255,7 +255,6 @@ case "$1" in
     ;;
 
   help | hostkeys:help)
-    cat && print_help
     if [[ -n $DOKKU_API_VERSION ]]; then
       print_help
     else

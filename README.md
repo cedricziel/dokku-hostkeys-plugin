@@ -21,7 +21,6 @@ dokku plugins-install
 
 # on 0.4.x
 dokku plugin:install https://github.com/cedricziel/dokku-hostkeys-plugin.git hostkeys-keys
-```
 
 ## usage
 
