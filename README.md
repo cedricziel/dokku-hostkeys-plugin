@@ -11,8 +11,12 @@ Installation
 ------------
 
 ```
+# dokku 0.3.x
 git clone https://github.com/cedricziel/dokku-hostkeys-plugin.git /var/lib/dokku/plugins/hostkeys
 dokku plugins-install
+
+# dokku 0.4+
+dokku plugin:install https://github.com/cedricziel/dokku-hostkeys-plugin.git
 ```
 
 Usage
