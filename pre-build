@@ -6,7 +6,7 @@ if ([[ -f "$(dirname $0)/../dokku_common" ]]); then
   source "$(dirname $0)/../dokku_common"
 fi
 
-[ `declare -f -F check_app_name` ] && check_app_name "$APP" || IMAGE="dokku/$APP"
+[[ $(declare -f -F check_app_name) ]] && check_app_name "$APP" || IMAGE="dokku/$APP"
 
 if [[ -n $DOKKU_API_VERSION ]]; then
   source "$PLUGIN_ENABLED_PATH/common/functions"
