@@ -15,7 +15,6 @@ fi
 
 APP_SPECIFIC_KEY_FOLDER="$DOKKU_ROOT/.hostkeys/$APP/.ssh"
 SHARED_KEY_FOLDER="$DOKKU_ROOT/.hostkeys/shared/.ssh"
-SOURCE_ENV_PATH="$HOME/$APP/ENV"
 echo "-----> Checking Hostkeys Plugin sanity ..."
 bash $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/install
 echo "-----> Installing Hostkeys in build environment ..."
