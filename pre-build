@@ -7,11 +7,15 @@ if ([[ -f "$(dirname $0)/../dokku_common" ]]); then
   source "$(dirname $0)/../dokku_common"
 fi
 
-[ `declare -f -F check_app_name` ] && check_app_name "$APP" || IMAGE="dokku/$APP" 
+[ $(declare -f -F check_app_name) ] && check_app_name "$APP" || IMAGE="dokku/$APP"
+
+if [[ -n $DOKKU_API_VERSION ]]; then
+  source "$PLUGIN_ENABLED_PATH/common/functions"
+  IMAGE=$(get_app_image_name $APP)
+fi
 
 APP_SPECIFIC_KEY_FOLDER="$DOKKU_ROOT/.hostkeys/$APP/.ssh"
 SHARED_KEY_FOLDER="$DOKKU_ROOT/.hostkeys/shared/.ssh"
-SOURCE_ENV_PATH="$HOME/$APP/ENV"
 echo "-----> Checking Hostkeys Plugin sanity ..."
 bash $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/install
 echo "-----> Installing Hostkeys in build environment ..."
@@ -46,7 +50,7 @@ if ([[ ! -z "$KNOWN_HOSTS_COMBINED" ]]); then
   idWithKeys=$(echo -e "$KNOWN_HOSTS_COMBINED" | docker run -i -a stdin $IMAGE /bin/bash -c "cat >> /etc/ssh/ssh_known_hosts && chmod 644 /etc/ssh/ssh_known_hosts")
   test $(docker wait $idWithKeys) -eq 0
   docker commit $idWithKeys $IMAGE > /dev/null
-  
+
   idWithConfig=$(echo "UserKnownHostsFile /etc/ssh/ssh_known_hosts" | docker run -i -a stdin $IMAGE /bin/bash -c "cat >> /etc/ssh/ssh_config" )
   test $(docker wait $idWithConfig) -eq 0
   docker commit $idWithConfig $IMAGE > /dev/null
