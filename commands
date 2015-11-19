@@ -88,9 +88,6 @@ print_explanation() {
     This command would automatically discover the hostkeys for github.com, add it to your known_hosts
     file for the mycoolapp app and will be compiled inside the slug on recompile.
 
-    $ dokku hostkeys:shared:autoadd github.com
-    This command would automatically discover the hostkeys for github.com and add it to your apps slug.
-
     You may as well want to have a look at the dokku-deployment-keys plugin on GitHub:
     http://github.com/cedricziel/dokku-deployment-keys
 
