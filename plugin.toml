@@ -1,4 +1,4 @@
 [plugin]
-description = "allows for injecting SSH host keys to the container"
+description = "Manage hostkeys for your container environment"
 version = "1.0.0"
 [plugin.config]
