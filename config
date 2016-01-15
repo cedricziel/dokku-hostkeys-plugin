@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+export HOSTKEYS_ROOT=${HOSTKEYS_ROOT:="/var/lib/dokku/services/hostkeys"}
+export HOSTKEYS_SHARED_HOSTKEYS_FOLDER="$HOSTKEYS_ROOT/.hostkeys/shared/.ssh"
+export HOSTKEYS_SHARED_HOSTKEYS_FILE="$HOSTKEYS_SHARED_HOSTKEYS_FOLDER/known_hosts"
+
+export PLUGIN_DATA_ROOT=$HOSTKEYS_ROOT
+export PLUGIN_SERVICE="Hostkeys"

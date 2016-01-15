@@ -1,16 +1,9 @@
 #!/usr/bin/env bash
 set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+source "$(dirname "$0")/config"
 
-SHARED_HOSTKEYS_FOLDER="$DOKKU_ROOT/.hostkeys/shared/.ssh"
+mkdir -p "$PLUGIN_DATA_ROOT" || echo "Failed to create $PLUGIN_SERVICE directory"
+mkdir -p "$HOSTKEYS_SHARED_HOSTKEYS_FOLDER" || echo "Failed to create shared hostkeys folder for $PLUGIN_SERVICE"
+touch "$HOSTKEYS_SHARED_HOSTKEYS_FILE" || echo "Failed to create shared hostkeys file for $PLUGIN_SERVICE"
 
-if [[ ! -d "$SHARED_HOSTKEYS_FOLDER" ]]
- then
-  mkdir -p "$SHARED_HOSTKEYS_FOLDER";
-fi
-
-if [[ ! -f "$SHARED_HOSTKEYS_FOLDER/known_hosts" ]]
- then
-  touch "$SHARED_HOSTKEYS_FOLDER/known_hosts";
-fi
-
-chown -R dokku:dokku "$DOKKU_ROOT/.hostkeys"
+chown dokku:dokku "$PLUGIN_DATA_ROOT"
