@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+source "$(dirname "$0")/config"
 
 APP="$1";
 
+# Source if dokku-alt
 if ([[ -f "$(dirname $0)/../dokku_common" ]]); then
   source "$(dirname $0)/../dokku_common"
 fi
