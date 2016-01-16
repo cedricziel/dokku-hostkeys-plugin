@@ -6,4 +6,4 @@ mkdir -p "$PLUGIN_DATA_ROOT" || echo "Failed to create $PLUGIN_SERVICE directory
 mkdir -p "$HOSTKEYS_SHARED_HOSTKEYS_FOLDER" || echo "Failed to create shared hostkeys folder for $PLUGIN_SERVICE"
 touch "$HOSTKEYS_SHARED_HOSTKEYS_FILE" || echo "Failed to create shared hostkeys file for $PLUGIN_SERVICE"
 
-chown dokku:dokku "$PLUGIN_DATA_ROOT"
+chown -R dokku:dokku "$PLUGIN_DATA_ROOT"
