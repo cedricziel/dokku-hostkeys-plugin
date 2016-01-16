@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
 source "$PLUGIN_CORE_AVAILABLE_PATH/common/functions"
+source "$(dirname "$0")/config"
+
+if [[ $1 == $PLUGIN_COMMAND_PREFIX:* ]]; then
+  if [[ ! -d $PLUGIN_DATA_ROOT ]]; then
+    dokku_log_fail "$PLUGIN_SERVICE: Please run: sudo dokku plugin:install"
+  fi
+fi
 
 APP=$2
 SHARED_KEY_TO_ADD=$2
