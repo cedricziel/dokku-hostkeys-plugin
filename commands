@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+source "$PLUGIN_CORE_AVAILABLE_PATH/common/functions"
+source "$(dirname "$0")/config"
+
+if [[ $1 == $PLUGIN_COMMAND_PREFIX:* ]]; then
+  if [[ ! -d $PLUGIN_DATA_ROOT ]]; then
+    dokku_log_fail "$PLUGIN_SERVICE: Please run: sudo dokku plugin:install"
+  fi
+fi
 
 APP=$2
 SHARED_KEY_TO_ADD=$2
@@ -29,12 +37,12 @@ check_app() {
 }
 
 check_install() {
-  if [[ ! -d "$SHARED_HOSTKEYS_FOLDER" ]]; then
+  if [[ ! -d "$HOSTKEYS_SHARED_HOSTKEYS_FOLDER" ]]; then
     echo "No shared keys folder available. Did you run 'dokku plugins-install'? Exiting."
     exit 1
   fi
 
-  if [[ ! -f "$SHARED_HOSTKEYS_FILE" ]]; then
+  if [[ ! -f "$HOSTKEYS_SHARED_HOSTKEYS_FILE" ]]; then
     echo "No shared keys file available. Did you run 'dokku plugins-install'? Exiting."
     exit 1
   fi
@@ -101,19 +109,19 @@ EOF
 }
 
 print_help() {
-  cat<<EOF
-    hostkeys                                        Print an explanation (Useful to get the concept)
-    hostkeys:shared:show                            Show shared hostkeys
-    hostkeys:shared:add                             Add a shared hostkey
-    hostkeys:shared:delete                          Deletes all shared hostkeys
-    hostkeys:shared:delete <hostname>               Deletes the shared hostkeys for the given host
-    hostkeys:shared:autoadd <hostname>              Automatically add hostkeys for a given host to the shared hostkeys
-    hostkeys:app:show <app>                         Show all hostkeys for a given app
-    hostkeys:app:add <app>                          Add a app-specific hostkey
-    hostkeys:app:delete <app>                       Deletes all app-specific hostkeys
-    hostkeys:app:autoadd <app> <hostname>           Automatically add hostkeys for a given host to the shared hostkeys
+  HELP=$(cat<<EOF
+  $PLUGIN_COMMAND_PREFIX, Print an explanation (Useful to get the concept)
+  $PLUGIN_COMMAND_PREFIX:shared:show, Show shared hostkeys
+  $PLUGIN_COMMAND_PREFIX:shared:add, Add a shared hostkey
+  $PLUGIN_COMMAND_PREFIX:shared:delete, Deletes all shared hostkeys
+  $PLUGIN_COMMAND_PREFIX:shared:delete <hostname>, Deletes the shared hostkeys for the given host
+  $PLUGIN_COMMAND_PREFIX:shared:autoadd <hostname>, Automatically add hostkeys for a given host to the shared hostkeys
+  $PLUGIN_COMMAND_PREFIX:app:show <app>, Show all hostkeys for a given app
+  $PLUGIN_COMMAND_PREFIX:app:add <app>, Add a app-specific hostkey
+  $PLUGIN_COMMAND_PREFIX:app:delete <app>, Deletes all app-specific hostkeys
+  $PLUGIN_COMMAND_PREFIX:app:autoadd <app> <hostname>, Automatically add hostkeys for a given host to the shared hostkeys
 EOF
-  return
+)
 }
 
 print_shared_keys() {
@@ -123,7 +131,7 @@ The following SHARED hostkeys have been registered:
 ---------------------------------------------------
 EOF
   if [[ ! -s "$SHARED_HOSTKEYS_FILE" ]]; then
-    echo "No keys registered. Use dokku 'hostkeys:shared:add <key>' to add one."
+    echo "No keys registered. Use dokku '$PLUGIN_COMMAND_PREFIX:shared:add <key>' to add one."
   else
     cat "$SHARED_HOSTKEYS_FILE"
   fi
@@ -147,7 +155,7 @@ delete_shared_keys() {
     echo "Deleted hostkey for $HOSTNAME_TO_REMOVE as well as the backup."
   else
     > $SHARED_HOSTKEYS_FILE
-    echo "Emptied the shared hostkey file. All apps will loose the shared keys on next push. Make sure you add the required ones"
+    echo "Emptied the shared hostkeys file. All apps will loose the shared keys on next push. Make sure you add the required ones"
   fi
 }
 
@@ -217,45 +225,44 @@ EOF
 }
 
 case "$1" in
-  hostkeys)
+  $PLUGIN_COMMAND_PREFIX)
     print_explanation
     print_help
     ;;
 
-  hostkeys:shared:show)
+  $PLUGIN_COMMAND_PREFIX:shared:show)
     print_shared_keys
     ;;
 
-  hostkeys:shared:add)
+  $PLUGIN_COMMAND_PREFIX:shared:add)
     add_shared_key
     ;;
 
-  hostkeys:shared:delete)
+  $PLUGIN_COMMAND_PREFIX:shared:delete)
     delete_shared_keys
     ;;
 
-  hostkeys:shared:autoadd)
+  $PLUGIN_COMMAND_PREFIX:shared:autoadd)
     autoadd_shared_key
     ;;
 
-  hostkeys:app:show)
+  $PLUGIN_COMMAND_PREFIX:app:show)
     print_keys_for_app
     ;;
 
-  hostkeys:app:add)
+  $PLUGIN_COMMAND_PREFIX:app:add)
     add_app_key
     ;;
 
-  hostkeys:app:delete)
+  $PLUGIN_COMMAND_PREFIX:app:delete)
     delete_app_keys
     ;;
 
-  hostkeys:app:autoadd)
+  $PLUGIN_COMMAND_PREFIX:app:autoadd)
     autoadd_app_key
     ;;
 
-  help | hostkeys:help)
-    cat && print_help
+  help | $PLUGIN_COMMAND_PREFIX:help)
     if [[ -n $DOKKU_API_VERSION ]]; then
       print_help
     else
