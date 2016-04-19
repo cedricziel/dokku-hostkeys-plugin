@@ -40,12 +40,11 @@ fi
 
 if ([[ ! -z "$KNOWN_HOSTS_COMBINED" ]]); then
   # 1. Create the .ssh folder
-  id=$(docker run -i -a stdin $IMAGE /bin/bash -c "mkdir -p -m 700 /app/.ssh")
+  id=$(docker run -d $IMAGE /bin/bash -c "mkdir -p -m 700 /app/.ssh")
   test $(docker wait $id) -eq 0
   docker commit $id $IMAGE > /dev/null
 
   # 2. Transfer the keyfile to the container
-  #idWithKeys=$(echo "$KNOWN_HOSTS_COMBINED" | docker run -i -a stdin $IMAGE /bin/bash -c "cat >> /.ssh/known_hosts && chmod 644 /.ssh/known_hosts")
   idWithKeys=$(echo -e "$KNOWN_HOSTS_COMBINED" | docker run -i -a stdin $IMAGE /bin/bash -c "cat >> /etc/ssh/ssh_known_hosts && chmod 644 /etc/ssh/ssh_known_hosts")
   test $(docker wait $idWithKeys) -eq 0
   docker commit $idWithKeys $IMAGE > /dev/null
