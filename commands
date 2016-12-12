@@ -154,10 +154,10 @@ delete_shared_keys() {
 autoadd_shared_key() {
   check_install
   if [[ -n "$HOSTNAME_TO_ADD" ]]; then
-  ssh-keyscan -H "$HOSTNAME_TO_ADD" >> "$SHARED_HOSTKEYS_FILE"
-  echo "Added keys for $HOSTNAME_TO_ADD"
+    ssh-keyscan -H "$HOSTNAME_TO_ADD" >> "$SHARED_HOSTKEYS_FILE"
+    echo "Added keys for $HOSTNAME_TO_ADD"
   else
-  echo "Please enter the name of the host as argument"
+    echo "Please enter the name of the host as argument"
   fi
 }
 
@@ -178,10 +178,10 @@ autoadd_app_key(){
   check_exists
   check_install_app
   if [[ -n "$HOSTNAME_TO_ADD_APP" ]]; then
-  ssh-keyscan -H "$HOSTNAME_TO_ADD_APP" >> "$APP_SPECIFIC_HOSTKEYS_FILE"
-  echo "Added keys for $HOSTNAME_TO_ADD_APP"
+    ssh-keyscan -H "$HOSTNAME_TO_ADD_APP" >> "$APP_SPECIFIC_HOSTKEYS_FILE"
+    echo "Added keys for $HOSTNAME_TO_ADD_APP"
   else
-  echo "Please enter the name of the host as argument"
+    echo "Please enter the name of the host as argument"
   fi
 }
 
@@ -227,11 +227,11 @@ case "$1" in
     ;;
 
   hostkeys:shared:add)
-    add_shared_key
+    add_shared_key "$@"
     ;;
 
   hostkeys:shared:delete)
-    delete_shared_keys
+    delete_shared_keys "$@"
     ;;
 
   hostkeys:shared:autoadd)
@@ -243,16 +243,16 @@ case "$1" in
     ;;
 
   hostkeys:app:add)
-    add_app_key
+    add_app_key "$@"
     ;;
 
   hostkeys:app:delete)
-    delete_app_keys
+    delete_app_keys "$@"
     ;;
 
   hostkeys:app:autoadd)
-  autoadd_app_key
-  ;;
+    autoadd_app_key
+    ;;
 
   help | hostkeys:help)
     if [[ -n $DOKKU_API_VERSION ]]; then
