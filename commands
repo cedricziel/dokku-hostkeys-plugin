@@ -251,10 +251,18 @@ case "$1" in
     ;;
 
   hostkeys:app:autoadd)
+<<<<<<< HEAD
   autoadd_app_key
   ;;
 
   help | hostkeys:help)
+=======
+    autoadd_app_key
+    ;;
+
+  help | hostkeys:help)
+    cat && print_help
+>>>>>>> upstream/master
     if [[ -n $DOKKU_API_VERSION ]]; then
       print_help
     else
