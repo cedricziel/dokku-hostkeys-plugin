@@ -28,25 +28,27 @@ check_app() {
   fi
 }
 
-check_install(){
-  if([[ ! -d "$SHARED_HOSTKEYS_FOLDER" ]] ); then
+check_install() {
+  if [[ ! -d "$SHARED_HOSTKEYS_FOLDER" ]]; then
     echo "No shared keys folder available. Did you run 'dokku plugins-install'? Exiting."
     exit 1
   fi
-  if([[ ! -f "$SHARED_HOSTKEYS_FILE" ]]); then
+
+  if [[ ! -f "$SHARED_HOSTKEYS_FILE" ]]; then
     echo "No shared keys file available. Did you run 'dokku plugins-install'? Exiting."
     exit 1
   fi
 }
 
-check_install_app(){
-  if([[ ! -d "$APP_SPECIFIC_HOSTKEYS_FOLDER" ]] ); then
+check_install_app() {
+  if [[ ! -d "$APP_SPECIFIC_HOSTKEYS_FOLDER" ]]; then
     echo "No app specific keys folder available. creating.."
     mkdir -p "$APP_SPECIFIC_HOSTKEYS_FOLDER"
     chmod 700 "$APP_SPECIFIC_HOSTKEYS_FOLDER"
     chown -R dokku:dokku "$DOKKU_ROOT/.hostkeys/$APP"
   fi
-  if([[ ! -f "$APP_SPECIFIC_HOSTKEYS_FILE" ]]); then
+
+  if [[ ! -f "$APP_SPECIFIC_HOSTKEYS_FILE" ]]; then
     echo "No app specific keys file available. creating.."
     touch "$APP_SPECIFIC_HOSTKEYS_FILE"
     chmod 644 "$APP_SPECIFIC_HOSTKEYS_FILE"
@@ -88,9 +90,6 @@ print_explanation() {
     This command would automatically discover the hostkeys for github.com, add it to your known_hosts
     file for the mycoolapp app and will be compiled inside the slug on recompile.
 
-    $ dokku hostkeys:shared:autoadd github.com
-    This command would automatically discover the hostkeys for github.com and add it to your apps slug.
-
     You may as well want to have a look at the dokku-deployment-keys plugin on GitHub:
     http://github.com/cedricziel/dokku-deployment-keys
 
@@ -101,7 +100,7 @@ print_explanation() {
 EOF
 }
 
-print_help(){
+print_help() {
   cat<<EOF
     hostkeys, Print an explanation (Useful to get the concept)
     hostkeys:shared:show, Show shared hostkeys
@@ -117,13 +116,13 @@ EOF
   return
 }
 
-print_shared_keys(){
+print_shared_keys() {
   check_install
   cat<<EOF
 The following SHARED hostkeys have been registered:
 ---------------------------------------------------
 EOF
-  if ( [[ ! -s "$SHARED_HOSTKEYS_FILE" ]] ); then
+  if [[ ! -s "$SHARED_HOSTKEYS_FILE" ]]; then
     echo "No keys registered. Use dokku 'hostkeys:shared:add <key>' to add one."
   else
     cat "$SHARED_HOSTKEYS_FILE"
@@ -152,7 +151,7 @@ delete_shared_keys() {
   fi
 }
 
-autoadd_shared_key(){
+autoadd_shared_key() {
   check_install
   if [[ -n "$HOSTNAME_TO_ADD" ]]; then
   ssh-keyscan -H "$HOSTNAME_TO_ADD" >> "$SHARED_HOSTKEYS_FILE"
@@ -200,7 +199,7 @@ delete_app_keys() {
   fi
 }
 
-print_keys_for_app(){
+print_keys_for_app() {
   check_app
   check_exists
   check_install_app
@@ -210,7 +209,7 @@ print_keys_for_app(){
 The following APP SPECIFIC hostkeys have been registered:
 ---------------------------------------------------------
 EOF
-  if ( [[ ! -s "$APP_SPECIFIC_HOSTKEYS_FILE" ]] ); then
+  if [[ ! -s "$APP_SPECIFIC_HOSTKEYS_FILE" ]]; then
     echo "No keys registered. Use dokku 'hostkeys:app:add <key>' to add one."
   else
     cat "$APP_SPECIFIC_HOSTKEYS_FILE"
@@ -221,39 +220,49 @@ case "$1" in
   hostkeys)
     print_explanation
     print_help
-  ;;
+    ;;
+
   hostkeys:shared:show)
     print_shared_keys
-  ;;
+    ;;
+
   hostkeys:shared:add)
     add_shared_key
-  ;;
+    ;;
+
   hostkeys:shared:delete)
     delete_shared_keys
-  ;;
+    ;;
+
   hostkeys:shared:autoadd)
     autoadd_shared_key
-  ;;
+    ;;
+
   hostkeys:app:show)
     print_keys_for_app
-  ;;
+    ;;
+
   hostkeys:app:add)
-  add_app_key
-  ;;
+    add_app_key
+    ;;
+
   hostkeys:app:delete)
-  delete_app_keys
-  ;;
+    delete_app_keys
+    ;;
+
   hostkeys:app:autoadd)
   autoadd_app_key
   ;;
-  help)
+
+  help | hostkeys:help)
     if [[ -n $DOKKU_API_VERSION ]]; then
       print_help
     else
       cat && print_help
     fi
-  ;;
+    ;;
+
   *)
     exit $DOKKU_NOT_IMPLEMENTED_EXIT
-  ;;
+    ;;
 esac

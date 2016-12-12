@@ -1,5 +1,4 @@
-SSH HostKeys Plugin for Dokku
-=============================
+# SSH HostKeys Plugin for Dokku
 
 Manage hostkeys (for .ssh/known_hosts) to your container environment
 
@@ -7,20 +6,24 @@ This is useful if you hide your sourcecode in private repositories at VCS provid
 
 You probably need something to manage your deployment keys as well. Checkout [dokku-deployment-keys](http://github.com/cedricziel/dokku-deployment-keys)
 
-Installation
-------------
+## requirements
 
-```
-# dokku 0.3.x
-git clone https://github.com/cedricziel/dokku-hostkeys-plugin.git /var/lib/dokku/plugins/hostkeys
+- dokku 0.4.0+
+- docker 1.8.x
+
+## installation
+
+```shell
+# on 0.3.x
+cd /var/lib/dokku/plugins
+git clone https://github.com/cedricziel/dokku-hostkeys-plugin.git hostkeys-keys
 dokku plugins-install
 
-# dokku 0.4+
-dokku plugin:install https://github.com/cedricziel/dokku-hostkeys-plugin.git
+# on 0.4.x
+dokku plugin:install https://github.com/cedricziel/dokku-hostkeys-plugin.git hostkeys-keys
 ```
 
-Usage
------
+## usage
 
 Use the ``dokku hostkeys`` command for further information:
 
@@ -57,16 +60,15 @@ $ dokku hostkeys:shared:autoadd mycoolapp github.com
 This command would automatically discover the hostkeys for github.com, add it to your known_hosts
 file for the mycoolapp app and will be compiled inside the slug on recompile.
 
-$ dokku hostkeys:shared:autoadd github.com
-This command would automatically discover the hostkeys for github.com and add it to your apps slug.
-
 You may as well want to have a look at the dokku-deployment-keys plugin on GitHub:
 http://github.com/cedricziel/dokku-deployment-keys
 
 Projects are kept separate because they each do one different thing.
+```
 
-Available Commands:
--------------------
+## commands:
+
+```
 hostkeys                                        Print an explanation (Useful to get the concept)
 hostkeys:shared:show                            Show shared hostkeys
 hostkeys:shared:add                             Add a shared hostkey

@@ -1,6 +1,4 @@
 [plugin]
 name = "dokku-hostkeys-plugin"
-description = "Manage hostkeys (for .ssh/known_hosts) to your container environment"
+description = "Manage hostkeys (.ssh/known_hosts) in your container environment"
 version = "0.1.0"
-website_url = "https://github.com/expa/dokku-hostkeys-plugin"
-[plugin.config]

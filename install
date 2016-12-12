@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
 
-SSH_KEYSCAN=`which ssh-keyscan`
 SHARED_HOSTKEYS_FOLDER="$DOKKU_ROOT/.hostkeys/shared/.ssh"
 
 if [[ ! -d "$SHARED_HOSTKEYS_FOLDER" ]]
@@ -9,7 +8,7 @@ if [[ ! -d "$SHARED_HOSTKEYS_FOLDER" ]]
   mkdir -p "$SHARED_HOSTKEYS_FOLDER";
 fi
 
-if [[ ! -d "$SHARED_HOSTKEYS_FOLDER/known_hosts" ]]
+if [[ ! -f "$SHARED_HOSTKEYS_FOLDER/known_hosts" ]]
  then
   touch "$SHARED_HOSTKEYS_FOLDER/known_hosts";
 fi
