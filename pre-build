@@ -9,7 +9,7 @@ SHARED_KEY_FOLDER="$DOKKU_ROOT/.hostkeys/shared/.ssh"
 bash $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/install
 [[ ! -f "$APP_SPECIFIC_KEY_FOLDER/known_hosts" ]] && [[ ! -f "$SHARED_KEY_FOLDER/known_hosts" ]] && return
 
-dokku_log_info1 "Adding hostkeys to build environment ..."
+dokku_log_info1 "Adding host-keys to build environment ..."
 
 KNOWN_HOSTS_COMBINED=""
 
