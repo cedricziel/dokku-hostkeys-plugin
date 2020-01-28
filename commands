@@ -131,7 +131,7 @@ EOF
 
 add_shared_key() {
   check_install
-  if [[ ! -n "$2" ]]; then
+  if [[ -n "$SHARED_KEY_TO_ADD" ]]; then
     echo $SHARED_KEY_TO_ADD >> "$SHARED_HOSTKEYS_FILE"
     echo "Added $SHARED_KEY_TO_ADD to the list of shared hostkeys"
   else
@@ -141,7 +141,7 @@ add_shared_key() {
 
 delete_shared_keys() {
   check_install
-  if [[ ! -n "$2" ]]; then
+  if [[ -n "$HOSTNAME_TO_REMOVE" ]]; then
     ssh-keygen -f "$SHARED_HOSTKEYS_FILE" -R "$HOSTNAME_TO_REMOVE"
     rm "$SHARED_HOSTKEYS_FOLDER/known_hosts.old"
     echo "Deleted hostkey for $HOSTNAME_TO_REMOVE as well as the backup."
@@ -165,7 +165,7 @@ add_app_key() {
   check_app
   check_exists
   check_install_app
-  if [[ ! -n "$3" ]]; then
+  if [[ -n "$SHARED_KEY_TO_ADD_APP" ]]; then
     echo $SHARED_KEY_TO_ADD_APP >> "$APP_SPECIFIC_HOSTKEYS_FILE"
     echo "Added $SHARED_KEY_TO_ADD_APP to the list of shared hostkeys"
   else
@@ -189,7 +189,7 @@ delete_app_keys() {
   check_app
   check_exists
   check_install_app
-  if [[ -n "$3" ]]; then
+  if [[ -n "$HOSTNAME_TO_REMOVE_APP" ]]; then
     ssh-keygen -f "$APP_SPECIFIC_HOSTKEYS_FILE" -R "$HOSTNAME_TO_REMOVE_APP"
     rm "$APP_SPECIFIC_HOSTKEYS_FOLDER/known_hosts.old"
     echo "Deleted hostkey for $HOSTNAME_TO_REMOVE as well as the backup."
@@ -227,11 +227,11 @@ case "$1" in
     ;;
 
   hostkeys:shared:add)
-    add_shared_key "$@"
+    add_shared_key
     ;;
 
   hostkeys:shared:delete)
-    delete_shared_keys "$@"
+    delete_shared_keys
     ;;
 
   hostkeys:shared:autoadd)
@@ -243,11 +243,11 @@ case "$1" in
     ;;
 
   hostkeys:app:add)
-    add_app_key "$@"
+    add_app_key
     ;;
 
   hostkeys:app:delete)
-    delete_app_keys "$@"
+    delete_app_keys
     ;;
 
   hostkeys:app:autoadd)
