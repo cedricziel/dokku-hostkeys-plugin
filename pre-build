@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+# shellcheck source=/dev/null
 source "$PLUGIN_ENABLED_PATH/common/functions"
 APP="$1"
 IMAGE=$(get_app_image_name $APP)
