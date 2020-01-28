@@ -157,7 +157,7 @@ delete_shared_keys() {
     rm "$SHARED_HOSTKEYS_FOLDER/known_hosts.old"
     echo "Deleted hostkey for $HOSTNAME_TO_REMOVE as well as the backup."
   else
-    > $SHARED_HOSTKEYS_FILE
+    true > $SHARED_HOSTKEYS_FILE
     echo "Emptied the shared hostkey file. All apps will loose the shared keys on next push. Make sure you add the required ones"
   fi
 }
@@ -214,7 +214,7 @@ delete_app_keys() {
     rm "$APP_SPECIFIC_HOSTKEYS_FOLDER/known_hosts.old"
     echo "Deleted hostkey for $HOSTNAME_TO_REMOVE_FOR_APP as well as the backup."
   else
-    > $APP_SPECIFIC_HOSTKEYS_FILE
+    true > $APP_SPECIFIC_HOSTKEYS_FILE
     echo "Emptied the app specific hostkey file. Your app looses the specific keys on the next push. Make sure you add the required ones"
   fi
 }
