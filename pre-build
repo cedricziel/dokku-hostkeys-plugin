@@ -28,7 +28,7 @@ if [[ -f "$SHARED_KEY_FOLDER/known_hosts" ]]; then
   fi
 fi
 
-if [[ ! -z "$KNOWN_HOSTS_COMBINED" ]]; then
+if [[ -n "$KNOWN_HOSTS_COMBINED" ]]; then
   # 1. Create the .ssh folder
   id=$(docker run $DOKKU_GLOBAL_RUN_ARGS -d $IMAGE /bin/bash -c "mkdir -p -m 700 /app/.ssh")
   test $(docker wait $id) -eq 0
