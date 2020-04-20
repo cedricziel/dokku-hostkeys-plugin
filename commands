@@ -2,12 +2,8 @@
 set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
 
 APP=$2
-SHARED_KEY_TO_ADD=$2
-SHARED_KEY_TO_ADD_APP=$3
 HOSTNAME_TO_ADD=$2
 HOSTNAME_TO_ADD_APP=$3
-HOSTNAME_TO_REMOVE=$2
-HOSTNAME_TO_REMOVE_APP=$3
 
 APP_SPECIFIC_HOSTKEYS_FOLDER="$DOKKU_ROOT/.hostkeys/$APP/.ssh"
 APP_SPECIFIC_HOSTKEYS_FILE="$APP_SPECIFIC_HOSTKEYS_FOLDER/known_hosts"
@@ -130,18 +126,20 @@ EOF
 }
 
 add_shared_key() {
+  local SHARED_HOSTKEY_TO_ADD=$2
   check_install
-  if [[ ! -n "$2" ]]; then
-    echo $SHARED_KEY_TO_ADD >> "$SHARED_HOSTKEYS_FILE"
-    echo "Added $SHARED_KEY_TO_ADD to the list of shared hostkeys"
+  if [[ -n "$SHARED_HOSTKEY_TO_ADD" ]]; then
+    echo $SHARED_HOSTKEY_TO_ADD >> "$SHARED_HOSTKEYS_FILE"
+    echo "Added $SHARED_HOSTKEY_TO_ADD to the list of shared hostkeys"
   else
     echo "Empty argument. Try again."
   fi
 }
 
 delete_shared_keys() {
+  local HOSTNAME_TO_REMOVE=$2
   check_install
-  if [[ ! -n "$2" ]]; then
+  if [[ -n "$HOSTNAME_TO_REMOVE" ]]; then
     ssh-keygen -f "$SHARED_HOSTKEYS_FILE" -R "$HOSTNAME_TO_REMOVE"
     rm "$SHARED_HOSTKEYS_FOLDER/known_hosts.old"
     echo "Deleted hostkey for $HOSTNAME_TO_REMOVE as well as the backup."
@@ -162,12 +160,13 @@ autoadd_shared_key() {
 }
 
 add_app_key() {
+  local HOSTKEY_TO_ADD_FOR_APP=$3 
   check_app
   check_exists
   check_install_app
-  if [[ ! -n "$3" ]]; then
-    echo $SHARED_KEY_TO_ADD_APP >> "$APP_SPECIFIC_HOSTKEYS_FILE"
-    echo "Added $SHARED_KEY_TO_ADD_APP to the list of shared hostkeys"
+  if [[ -n "$HOSTKEY_TO_ADD_FOR_APP" ]]; then
+    echo $HOSTKEY_TO_ADD_FOR_APP >> "$APP_SPECIFIC_HOSTKEYS_FILE"
+    echo "Added $HOSTKEY_TO_ADD_FOR_APP to the list of shared hostkeys"
   else
     echo "Empty argument. Try again."
   fi
@@ -186,13 +185,14 @@ autoadd_app_key(){
 }
 
 delete_app_keys() {
+  local HOSTNAME_TO_REMOVE_FOR_APP=$3
   check_app
   check_exists
   check_install_app
-  if [[ -n "$3" ]]; then
-    ssh-keygen -f "$APP_SPECIFIC_HOSTKEYS_FILE" -R "$HOSTNAME_TO_REMOVE_APP"
+  if [[ -n "$HOSTNAME_TO_REMOVE_FOR_APP" ]]; then
+    ssh-keygen -f "$APP_SPECIFIC_HOSTKEYS_FILE" -R "$HOSTNAME_TO_REMOVE_FOR_APP"
     rm "$APP_SPECIFIC_HOSTKEYS_FOLDER/known_hosts.old"
-    echo "Deleted hostkey for $HOSTNAME_TO_REMOVE as well as the backup."
+    echo "Deleted hostkey for $HOSTNAME_TO_REMOVE_FOR_APP as well as the backup."
   else
     > $APP_SPECIFIC_HOSTKEYS_FILE
     echo "Emptied the app specific hostkey file. Your app looses the specific keys on the next push. Make sure you add the required ones"
