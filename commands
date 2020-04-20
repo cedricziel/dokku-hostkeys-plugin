@@ -3,7 +3,7 @@ set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
 
 APP=$2
 HOSTNAME_TO_ADD=$2
-HOSTNAME_TO_ADD_APP=$3
+HOSTNAME_TO_ADD_FOR_APP=$3
 
 APP_SPECIFIC_HOSTKEYS_FOLDER="$DOKKU_ROOT/.hostkeys/$APP/.ssh"
 APP_SPECIFIC_HOSTKEYS_FILE="$APP_SPECIFIC_HOSTKEYS_FOLDER/known_hosts"
@@ -174,9 +174,9 @@ add_app_key() {
 
 autoadd_app_key(){
   check_app
-  if [[ -n "$HOSTNAME_TO_ADD_APP" ]]; then
-    ssh-keyscan -H "$HOSTNAME_TO_ADD_APP" >> "$APP_SPECIFIC_HOSTKEYS_FILE"
-    echo "Added keys for $HOSTNAME_TO_ADD_APP"
+  if [[ -n "$HOSTNAME_TO_ADD_FOR_APP" ]]; then
+    ssh-keyscan -H "$HOSTNAME_TO_ADD_FOR_APP" >> "$APP_SPECIFIC_HOSTKEYS_FILE"
+    echo "Added keys for $HOSTNAME_TO_ADD_FOR_APP"
   else
     echo "Please enter the name of the host as argument"
   fi
