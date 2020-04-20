@@ -5,10 +5,21 @@ APP=$2
 HOSTNAME_TO_ADD=$2
 HOSTNAME_TO_ADD_FOR_APP=$3
 
-APP_SPECIFIC_HOSTKEYS_FOLDER="$DOKKU_ROOT/.hostkeys/$APP/.ssh"
-APP_SPECIFIC_HOSTKEYS_FILE="$APP_SPECIFIC_HOSTKEYS_FOLDER/known_hosts"
 SHARED_HOSTKEYS_FOLDER="$DOKKU_ROOT/.hostkeys/shared/.ssh"
 SHARED_HOSTKEYS_FILE="$SHARED_HOSTKEYS_FOLDER/known_hosts"
+
+get_hostkeys_folder_for_app() {
+  local APP=$1
+  echo "$DOKKU_ROOT/.hostkeys/$APP/.ssh"  
+}
+
+get_hostkeys_file_path_for_app() {
+  local APP=$1
+  echo "$(get_hostkeys_folder_for_app "$APP")/known_hosts"
+}
+
+APP_SPECIFIC_HOSTKEYS_FOLDER="$(get_hostkeys_folder_for_app "$APP")"
+APP_SPECIFIC_HOSTKEYS_FILE="$(get_hostkeys_file_path_for_app "$APP")"
 
 check_exists() {
   if [[ ! -d "$DOKKU_ROOT/$APP" ]]; then
