@@ -1,10 +1,6 @@
 #!/usr/bin/env bash
 set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
 
-APP=$2
-HOSTNAME_TO_ADD=$2
-HOSTNAME_TO_ADD_FOR_APP=$3
-
 SHARED_HOSTKEYS_FOLDER="$DOKKU_ROOT/.hostkeys/shared/.ssh"
 SHARED_HOSTKEYS_FILE="$SHARED_HOSTKEYS_FOLDER/known_hosts"
 
@@ -18,10 +14,8 @@ get_hostkeys_file_path_for_app() {
   echo "$(get_hostkeys_folder_for_app "$APP")/known_hosts"
 }
 
-APP_SPECIFIC_HOSTKEYS_FOLDER="$(get_hostkeys_folder_for_app "$APP")"
-APP_SPECIFIC_HOSTKEYS_FILE="$(get_hostkeys_file_path_for_app "$APP")"
-
 check_exists() {
+  local APP=$1
   if [[ ! -d "$DOKKU_ROOT/$APP" ]]; then
     echo "App must exist before managing hostkeys for it"
     exit 1
@@ -29,12 +23,13 @@ check_exists() {
 }
 
 check_app() {
+  local APP=$1
   if [[ -z "$APP" ]]; then
     echo "You must specify an app name"
     exit 1
   fi
-  check_exists
-  check_install_app
+  check_exists "$APP"
+  check_install_app "$APP"
 }
 
 check_install() {
@@ -50,6 +45,11 @@ check_install() {
 }
 
 check_install_app() {
+  local APP=$1
+  local APP_SPECIFIC_HOSTKEYS_FOLDER
+  local APP_SPECIFIC_HOSTKEYS_FILE
+  APP_SPECIFIC_HOSTKEYS_FOLDER="$(get_hostkeys_folder_for_app "$APP")"
+  APP_SPECIFIC_HOSTKEYS_FILE="$(get_hostkeys_file_path_for_app "$APP")"
   if [[ ! -d "$APP_SPECIFIC_HOSTKEYS_FOLDER" ]]; then
     echo "No app specific keys folder available. creating.."
     mkdir -p "$APP_SPECIFIC_HOSTKEYS_FOLDER"
@@ -163,6 +163,7 @@ delete_shared_keys() {
 }
 
 autoadd_shared_key() {
+  local HOSTNAME_TO_ADD=$2
   check_install
   if [[ -n "$HOSTNAME_TO_ADD" ]]; then
     ssh-keyscan -H "$HOSTNAME_TO_ADD" >> "$SHARED_HOSTKEYS_FILE"
@@ -173,8 +174,11 @@ autoadd_shared_key() {
 }
 
 add_app_key() {
-  local HOSTKEY_TO_ADD_FOR_APP=$3 
-  check_app
+  local APP=$2
+  local HOSTKEY_TO_ADD_FOR_APP=$3
+  local APP_SPECIFIC_HOSTKEYS_FILE
+  APP_SPECIFIC_HOSTKEYS_FILE="$(get_hostkeys_file_path_for_app "$APP")" 
+  check_app "$APP"
   if [[ -n "$HOSTKEY_TO_ADD_FOR_APP" ]]; then
     echo $HOSTKEY_TO_ADD_FOR_APP >> "$APP_SPECIFIC_HOSTKEYS_FILE"
     echo "Added $HOSTKEY_TO_ADD_FOR_APP to the list of shared hostkeys"
@@ -184,7 +188,11 @@ add_app_key() {
 }
 
 autoadd_app_key(){
-  check_app
+  local APP=$2
+  local HOSTNAME_TO_ADD_FOR_APP=$3
+  local APP_SPECIFIC_HOSTKEYS_FILE
+  APP_SPECIFIC_HOSTKEYS_FILE="$(get_hostkeys_file_path_for_app "$APP")"
+  check_app "$APP"
   if [[ -n "$HOSTNAME_TO_ADD_FOR_APP" ]]; then
     ssh-keyscan -H "$HOSTNAME_TO_ADD_FOR_APP" >> "$APP_SPECIFIC_HOSTKEYS_FILE"
     echo "Added keys for $HOSTNAME_TO_ADD_FOR_APP"
@@ -194,8 +202,13 @@ autoadd_app_key(){
 }
 
 delete_app_keys() {
+  local APP=$2
   local HOSTNAME_TO_REMOVE_FOR_APP=$3
-  check_app
+  local APP_SPECIFIC_HOSTKEYS_FOLDER
+  local APP_SPECIFIC_HOSTKEYS_FILE
+  APP_SPECIFIC_HOSTKEYS_FOLDER="$(get_hostkeys_folder_for_app "$APP")"
+  APP_SPECIFIC_HOSTKEYS_FILE="$(get_hostkeys_file_path_for_app "$APP")"
+  check_app "$APP"
   if [[ -n "$HOSTNAME_TO_REMOVE_FOR_APP" ]]; then
     ssh-keygen -f "$APP_SPECIFIC_HOSTKEYS_FILE" -R "$HOSTNAME_TO_REMOVE_FOR_APP"
     rm "$APP_SPECIFIC_HOSTKEYS_FOLDER/known_hosts.old"
@@ -207,7 +220,10 @@ delete_app_keys() {
 }
 
 print_keys_for_app() {
-  check_app
+  local APP=$2
+  local APP_SPECIFIC_HOSTKEYS_FILE
+  APP_SPECIFIC_HOSTKEYS_FILE="$(get_hostkeys_file_path_for_app "$APP")"
+  check_app "$APP"
   print_shared_keys
   cat<<EOF
 
@@ -240,11 +256,11 @@ case "$1" in
     ;;
 
   hostkeys:shared:autoadd)
-    autoadd_shared_key
+    autoadd_shared_key "$@"
     ;;
 
   hostkeys:app:show)
-    print_keys_for_app
+    print_keys_for_app "$@"
     ;;
 
   hostkeys:app:add)
@@ -256,7 +272,7 @@ case "$1" in
     ;;
 
   hostkeys:app:autoadd)
-    autoadd_app_key
+    autoadd_app_key "$@"
     ;;
 
   help | hostkeys:help)
