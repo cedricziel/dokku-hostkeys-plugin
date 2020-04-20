@@ -22,6 +22,8 @@ check_app() {
     echo "You must specify an app name"
     exit 1
   fi
+  check_exists
+  check_install_app
 }
 
 check_install() {
@@ -162,8 +164,6 @@ autoadd_shared_key() {
 add_app_key() {
   local HOSTKEY_TO_ADD_FOR_APP=$3 
   check_app
-  check_exists
-  check_install_app
   if [[ -n "$HOSTKEY_TO_ADD_FOR_APP" ]]; then
     echo $HOSTKEY_TO_ADD_FOR_APP >> "$APP_SPECIFIC_HOSTKEYS_FILE"
     echo "Added $HOSTKEY_TO_ADD_FOR_APP to the list of shared hostkeys"
@@ -174,8 +174,6 @@ add_app_key() {
 
 autoadd_app_key(){
   check_app
-  check_exists
-  check_install_app
   if [[ -n "$HOSTNAME_TO_ADD_APP" ]]; then
     ssh-keyscan -H "$HOSTNAME_TO_ADD_APP" >> "$APP_SPECIFIC_HOSTKEYS_FILE"
     echo "Added keys for $HOSTNAME_TO_ADD_APP"
@@ -187,8 +185,6 @@ autoadd_app_key(){
 delete_app_keys() {
   local HOSTNAME_TO_REMOVE_FOR_APP=$3
   check_app
-  check_exists
-  check_install_app
   if [[ -n "$HOSTNAME_TO_REMOVE_FOR_APP" ]]; then
     ssh-keygen -f "$APP_SPECIFIC_HOSTKEYS_FILE" -R "$HOSTNAME_TO_REMOVE_FOR_APP"
     rm "$APP_SPECIFIC_HOSTKEYS_FOLDER/known_hosts.old"
@@ -201,8 +197,6 @@ delete_app_keys() {
 
 print_keys_for_app() {
   check_app
-  check_exists
-  check_install_app
   print_shared_keys
   cat<<EOF
 
