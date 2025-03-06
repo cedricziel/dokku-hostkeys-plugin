@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+/#!/usr/bin/env bash
 set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
 source "$PLUGIN_ENABLED_PATH/common/functions"
 BUILDER_TYPE="$1" APP="$2"
@@ -37,11 +37,12 @@ if [[ ! -z "$KNOWN_HOSTS_COMBINED" ]]; then
   docker commit $id $IMAGE > /dev/null
 
   # 2. Transfer the keyfile to the container
-  idWithKeys=$(echo -e "$KNOWN_HOSTS_COMBINED" | docker run $DOKKU_GLOBAL_RUN_ARGS -i -a stdin $IMAGE /bin/bash -c "cat >> /etc/ssh/ssh_known_hosts && chmod 644 /etc/ssh/ssh_known_hosts")
+  hosts=$(echo -e "$KNOWN_HOSTS_COMBINED")
+  idWithKeys=$(docker run $DOKKU_GLOBAL_RUN_ARGS -d $IMAGE /bin/bash -c "echo \"$hosts\" >> /etc/ssh/ssh_known_hosts && chmod 644 /etc/ssh/ssh_known_hosts")
   test $(docker wait $idWithKeys) -eq 0
   docker commit $idWithKeys $IMAGE > /dev/null
 
-  idWithConfig=$(echo "UserKnownHostsFile /etc/ssh/ssh_known_hosts" | docker run $DOKKU_GLOBAL_RUN_ARGS -i -a stdin $IMAGE /bin/bash -c "cat >> /etc/ssh/ssh_config" )
+  idWithConfig=$(docker run $DOKKU_GLOBAL_RUN_ARGS -d $IMAGE /bin/bash -c "echo \"UserKnownHostsFile /etc/ssh/ssh_known_hosts\" >> /etc/ssh/ssh_config" )
   test $(docker wait $idWithConfig) -eq 0
   docker commit $idWithConfig $IMAGE > /dev/null
 fi
