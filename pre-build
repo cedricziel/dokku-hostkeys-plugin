@@ -1,4 +1,4 @@
-/#!/usr/bin/env bash
+#!/usr/bin/env bash
 set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
 source "$PLUGIN_ENABLED_PATH/common/functions"
 BUILDER_TYPE="$1" APP="$2"
