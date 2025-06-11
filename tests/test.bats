@@ -29,7 +29,9 @@ teardown() {
 }
 
 @test "($PLUGIN_COMMAND_PREFIX:add) adds a new app specific known_hosts entry" {
-  run dokku "$PLUGIN_COMMAND_PREFIX:add" my-app "github.com"
+  key="$(ssh-keyscan -H github.com | grep ecdsa-sha2-nistp256 | head -n 1)"
+
+  run dokku "$PLUGIN_COMMAND_PREFIX:add" my-app "$key"
   echo "output: $output"
   echo "status: $status"
   assert_success
@@ -38,7 +40,9 @@ teardown() {
 }
 
 @test "($PLUGIN_COMMAND_PREFIX:add) adds a new shared known_hosts entry" {
-  run dokku "$PLUGIN_COMMAND_PREFIX:add" --shared "github.com"
+  key="$(ssh-keyscan -H github.com | grep ecdsa-sha2-nistp256 | head -n 1)"
+
+  run dokku "$PLUGIN_COMMAND_PREFIX:add" --shared "$key"
   echo "output: $output"
   echo "status: $status"
   assert_success
