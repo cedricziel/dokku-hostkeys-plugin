@@ -103,7 +103,7 @@ fn-hostkeys-delete-app-keys() {
     dokku_log_verbose_quiet "Deleted hostkey for $HOSTNAME as well as the backup"
   else
     echo "" >"$APP_SPECIFIC_HOSTKEYS_FILE"
-    dokku_log_verbose_quiet "Emptied the app specific hostkey file. Your app looses the specific keys on the next push. Make sure you add the required ones"
+    dokku_log_verbose_quiet "Emptied the app specific hostkey file. Your app loses the specific keys on the next push. Make sure you add the required ones"
   fi
 }
 
