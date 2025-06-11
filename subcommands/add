@@ -18,6 +18,10 @@ add-cmd() {
   [[ ${argv[0]} == "$cmd" ]] && shift 1
   declare APP="$1" HOSTKEY="$2"
 
+  if [[ -z "$HOSTKEY" ]]; then
+    dokku_log_fail "Please specify a hostkey to add"
+  fi
+
   if [[ "$APP" == "--shared" ]]; then
     fn-hostkeys-add-shared-key "$HOSTKEY"
   else
