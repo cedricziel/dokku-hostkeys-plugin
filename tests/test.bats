@@ -2,13 +2,27 @@
 load test_helper
 
 setup() {
-  dokku apps:create my-app
+  run dokku apps:create my-app
+  echo "output: $output"
+  echo "status: $status"
+  assert_success
 }
 
 teardown() {
-  echo "" >"/home/dokku/.hostkeys/shared/.ssh/known_hosts"
-  chown dokku:dokku "/home/dokku/.hostkeys/shared/.ssh/known_hosts"
-  dokku --force apps:destroy my-app || true
+  run dokku "$PLUGIN_COMMAND_PREFIX:delete" --shared "github.com"
+  echo "output: $output"
+  echo "status: $status"
+  assert_success
+
+  run chown dokku:dokku "/home/dokku/.hostkeys/shared/.ssh/known_hosts"
+  echo "output: $output"
+  echo "status: $status"
+  assert_success
+
+  run dokku --force apps:destroy my-app
+  echo "output: $output"
+  echo "status: $status"
+  assert_success
 }
 
 @test "($PLUGIN_COMMAND_PREFIX:help) displays help" {
@@ -19,14 +33,16 @@ teardown() {
   assert_output_contains "Manage known_hosts in your container environment"
 }
 
-@test "($PLUGIN_COMMAND_PREFIX:add) adds a new known_hosts entry" {
+@test "($PLUGIN_COMMAND_PREFIX:add) adds a new app specific known_hosts entry" {
   run dokku "$PLUGIN_COMMAND_PREFIX:add" my-app "github.com"
   echo "output: $output"
   echo "status: $status"
   assert_success
   assert_output_contains "Added"
   assert_output_contains "to the list of app specific hostkeys"
+}
 
+@test "($PLUGIN_COMMAND_PREFIX:add) adds a new shared known_hosts entry" {
   run dokku "$PLUGIN_COMMAND_PREFIX:add" --shared "github.com"
   echo "output: $output"
   echo "status: $status"
