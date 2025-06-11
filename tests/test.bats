@@ -40,11 +40,11 @@ teardown() {
   echo "status: $status"
   assert_success
 
-  run cat "/home/dokku/.hostkeys/my-app/.ssh/known_hosts"
+  run dokku "$PLUGIN_COMMAND_PREFIX:show" my-app
   echo "output: $output"
   echo "status: $status"
   assert_success
-  assert_output_contains "github.com"
+  assert_output_contains "ecdsa-sha2-nistp256"
 
   run dokku "$PLUGIN_COMMAND_PREFIX:delete" my-app "github.com"
   echo "output: $output"
@@ -59,13 +59,13 @@ teardown() {
   echo "status: $status"
   assert_success
 
-  run dokku "$PLUGIN_COMMAND_PREFIX:show --shared"
+  run dokku "$PLUGIN_COMMAND_PREFIX:show" --shared
   echo "output: $output"
   echo "status: $status"
   assert_success
-  assert_output_contains "github.com"
+  assert_output_contains "ecdsa-sha2-nistp256"
 
-  run dokku "$PLUGIN_COMMAND_PREFIX:autoadd" --shared"github.com"
+  run dokku "$PLUGIN_COMMAND_PREFIX:autoadd" --shared "github.com"
   echo "output: $output"
   echo "status: $status"
   assert_success
@@ -74,7 +74,7 @@ teardown() {
   echo "output: $output"
   echo "status: $status"
   assert_success
-  assert_output_contains "github.com"
+  assert_output_contains "ecdsa-sha2-nistp256"
 }
 
 @test "($PLUGIN_COMMAND_PREFIX:deploy) ensure the app-specific key is baked into the container" {
