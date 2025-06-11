@@ -14,11 +14,6 @@ teardown() {
   echo "status: $status"
   assert_success
 
-  run chown dokku:dokku "/home/dokku/.hostkeys/shared/.ssh/known_hosts"
-  echo "output: $output"
-  echo "status: $status"
-  assert_success
-
   run dokku --force apps:destroy my-app
   echo "output: $output"
   echo "status: $status"
