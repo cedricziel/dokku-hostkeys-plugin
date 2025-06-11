@@ -13,7 +13,7 @@ show-cmd() {
   #A app, app to run command against
   #F --shared, show the shared hostkeys
   declare desc="shows the current status of the hostkeys for an app"
-  local cmd="$PLUGIN_COMMAND_PREFIX:status" argv=("$@")
+  local cmd="$PLUGIN_COMMAND_PREFIX:show" argv=("$@")
   [[ ${argv[0]} == "$cmd" ]] && shift 1
   declare APP="$1"
 
