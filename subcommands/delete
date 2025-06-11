@@ -14,7 +14,7 @@ delete-cmd() {
   #A hostname, hostname to delete
   #F --shared, show the shared hostkeys
   declare desc="deletes a hostkey from the app"
-  local cmd="$PLUGIN_COMMAND_PREFIX:status" argv=("$@")
+  local cmd="$PLUGIN_COMMAND_PREFIX:delete" argv=("$@")
   [[ ${argv[0]} == "$cmd" ]] && shift 1
   declare APP="$1" HOSTNAME="$2"
 
