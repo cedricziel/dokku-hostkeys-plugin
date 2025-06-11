@@ -40,7 +40,7 @@ fn-hostkeys-autoadd-app-key() {
 
   fn-hostkeys-check-install-app "$APP"
   if [[ -n "$HOSTNAME" ]]; then
-    ssh-keyscan -H "$HOSTNAME" >>"$APP_SPECIFIC_HOSTKEYS_FILE"
+    ssh-keyscan -H "$HOSTNAME" >>"$APP_SPECIFIC_HOSTKEYS_FILE" 2>/dev/null
     dokku_log_verbose_quiet "Added keys for $HOSTNAME"
   else
     dokku_log_fail "Please enter the name of the host as argument"
@@ -55,7 +55,7 @@ fn-hostkeys-autoadd-shared-key() {
 
   fn-hostkeys-check-install
   if [[ -n "$HOSTNAME" ]]; then
-    ssh-keyscan -H "$HOSTNAME" >>"$SHARED_HOSTKEYS_FILE"
+    ssh-keyscan -H "$HOSTNAME" >>"$SHARED_HOSTKEYS_FILE" 2>/dev/null
     dokku_log_verbose_quiet "Added keys for $HOSTNAME"
   else
     dokku_log_fail "Please enter the name of the host as argument"
