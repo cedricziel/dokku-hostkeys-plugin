@@ -5,6 +5,9 @@ set -eo pipefail
 fn-hostkeys-add-app-key() {
   declare desc="Adds a hostkey to the app"
   declare APP="$1" HOSTKEY="$2"
+  local APP_SPECIFIC_HOSTKEYS_FOLDER="$DOKKU_ROOT/.hostkeys/$APP/.ssh"
+  local APP_SPECIFIC_HOSTKEYS_FILE="$APP_SPECIFIC_HOSTKEYS_FOLDER/known_hosts"
+
   fn-hostkeys-check-install-app "$APP"
   if [[ -n "$HOSTKEY" ]]; then
     echo "$HOSTKEY" >>"$APP_SPECIFIC_HOSTKEYS_FILE"
