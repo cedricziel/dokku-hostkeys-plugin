@@ -14,7 +14,7 @@ autoadd-cmd() {
   #A hostname, hostname to autoadd
   #F --shared, show the shared hostkeys
   declare desc="autoadds a hostkey for the given hostname to the app"
-  local cmd="$PLUGIN_COMMAND_PREFIX:status" argv=("$@")
+  local cmd="$PLUGIN_COMMAND_PREFIX:autoadd" argv=("$@")
   [[ ${argv[0]} == "$cmd" ]] && shift 1
   declare APP="$1" HOSTNAME="$2"
 

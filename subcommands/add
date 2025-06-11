@@ -14,7 +14,7 @@ add-cmd() {
   #A hostkey, hostkey to add
   #F --shared, show the shared hostkeys
   declare desc="adds a hostkey to the app"
-  local cmd="$PLUGIN_COMMAND_PREFIX:status" argv=("$@")
+  local cmd="$PLUGIN_COMMAND_PREFIX:add" argv=("$@")
   [[ ${argv[0]} == "$cmd" ]] && shift 1
   declare APP="$1" HOSTKEY="$2"
 
