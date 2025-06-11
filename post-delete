@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -eo pipefail
+[[ $DOKKU_TRACE ]] && set -x
+
+trigger-hostkeys-post-delete() {
+  declare desc="destroys the hostkeys for a given app"
+  declare trigger="post-delete"
+  declare APP="$1"
+
+  local app_specific_key_folder="$DOKKU_ROOT/.hostkeys/$APP/.ssh"
+  rm -rf "$app_specific_key_folder"
+}
+trigger-hostkeys-post-delete "$@"

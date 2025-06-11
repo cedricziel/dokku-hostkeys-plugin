@@ -3,11 +3,10 @@ load test_helper
 
 setup() {
   dokku apps:create my-app
-  echo "" >"/home/dokku/.hostkeys/my-app/.ssh/known_hosts"
-  echo "" >"/home/dokku/.hostkeys/shared/.ssh/known_hosts"
 }
 
 teardown() {
+  echo "" >"/home/dokku/.hostkeys/shared/.ssh/known_hosts"
   dokku --force apps:destroy my-app || true
 }
 
