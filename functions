@@ -106,7 +106,7 @@ fn-hostkeys-delete-app-key() {
   fn-hostkeys-check-install-app "$APP"
   if [[ -n "$HOSTNAME" ]]; then
     ssh-keygen -f "$APP_SPECIFIC_HOSTKEYS_FILE" -R "$HOSTNAME"
-    rm "$APP_SPECIFIC_HOSTKEYS_FOLDER/known_hosts.old"
+    rm -f "$APP_SPECIFIC_HOSTKEYS_FOLDER/known_hosts.old" >/dev/null 2>&1 || true
     dokku_log_verbose_quiet "Deleted hostkey for $HOSTNAME as well as the backup"
   else
     echo "" >"$APP_SPECIFIC_HOSTKEYS_FILE"
@@ -123,7 +123,7 @@ fn-hostkeys-delete-shared-key() {
   fn-hostkeys-check-install
   if [[ -n "$HOSTNAME" ]]; then
     ssh-keygen -f "$SHARED_HOSTKEYS_FILE" -R "$HOSTNAME"
-    rm "$SHARED_HOSTKEYS_FOLDER/known_hosts.old"
+    rm -f "$SHARED_HOSTKEYS_FOLDER/known_hosts.old" >/dev/null 2>&1 || true
     dokku_log_verbose_quiet "Deleted hostkey for $HOSTNAME as well as the backup."
   else
     echo "" >"$SHARED_HOSTKEYS_FILE"
