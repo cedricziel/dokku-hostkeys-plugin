@@ -9,11 +9,11 @@ trigger-hostkeys-install() {
   SHARED_HOSTKEYS_FOLDER="$DOKKU_ROOT/.hostkeys/shared/.ssh"
 
   if [[ ! -d "$SHARED_HOSTKEYS_FOLDER" ]]; then
-    mkdir -p "$SHARED_HOSTKEYS_FOLDER"
+    install -d -m 0700 "$SHARED_HOSTKEYS_FOLDER"
   fi
 
   if [[ ! -f "$SHARED_HOSTKEYS_FOLDER/known_hosts" ]]; then
-    touch "$SHARED_HOSTKEYS_FOLDER/known_hosts"
+    install -m 0600 /dev/null "$SHARED_HOSTKEYS_FOLDER/known_hosts"
   fi
 
   chown -R dokku:dokku "$DOKKU_ROOT/.hostkeys"
