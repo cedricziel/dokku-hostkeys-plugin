@@ -23,12 +23,12 @@ trigger-hostkeys-pre-build() {
 
   KNOWN_HOSTS_COMBINED=""
 
-  if [[ -f "$APP_SPECIFIC_KEY_FOLDER/known_hosts" ]]; then
+  if [[ -s "$APP_SPECIFIC_KEY_FOLDER/known_hosts" ]]; then
     KNOWN_HOSTS_COMBINED=$(cat "$APP_SPECIFIC_KEY_FOLDER/known_hosts")
     dokku_log_verbose_quiet "Adding app specific keys"
   fi
 
-  if [[ -f "$SHARED_KEY_FOLDER/known_hosts" ]]; then
+  if [[ -s "$SHARED_KEY_FOLDER/known_hosts" ]]; then
     dokku_log_verbose_quiet "Adding shared keys"
     if [[ -z "$KNOWN_HOSTS_COMBINED" ]]; then
       KNOWN_HOSTS_COMBINED="$(cat "$SHARED_KEY_FOLDER/known_hosts")"
