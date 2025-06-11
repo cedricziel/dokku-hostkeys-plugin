@@ -31,7 +31,7 @@ trigger-hostkeys-pre-build() {
   if [[ -f "$SHARED_KEY_FOLDER/known_hosts" ]]; then
     dokku_log_verbose_quiet "Adding shared keys"
     if ([[ -z "$KNOWN_HOSTS_COMBINED" ]]); then
-      KNOWN_HOSTS_COMBINED="$KNOWN_HOSTS_COMBINED"$(cat "$SHARED_KEY_FOLDER/known_hosts")
+      KNOWN_HOSTS_COMBINED="$(cat "$SHARED_KEY_FOLDER/known_hosts")"
     else
       KNOWN_HOSTS_COMBINED="$KNOWN_HOSTS_COMBINED"$'\n'$(cat "$SHARED_KEY_FOLDER/known_hosts")
     fi
