@@ -34,7 +34,7 @@ teardown() {
   assert_output_contains "to the list of shared hostkeys"
 }
 
-@test "($PLUGIN_COMMAND_PREFIX:delete) deletes a hostkey" {
+@test "($PLUGIN_COMMAND_PREFIX:delete) deletes an app specific hostkey" {
   run dokku "$PLUGIN_COMMAND_PREFIX:autoadd" my-app "github.com"
   echo "output: $output"
   echo "status: $status"
@@ -53,8 +53,8 @@ teardown() {
   assert_output_contains "Deleted hostkey for github.com as well as the backup"
 }
 
-@test "($PLUGIN_COMMAND_PREFIX:show) shows the shared hostkeys" {
-  run dokku "$PLUGIN_COMMAND_PREFIX:autoadd" my-app "github.com"
+@test "($PLUGIN_COMMAND_PREFIX:delete) deletes a shared hostkey" {
+  run dokku "$PLUGIN_COMMAND_PREFIX:autoadd" --shared "github.com"
   echo "output: $output"
   echo "status: $status"
   assert_success
@@ -65,12 +65,33 @@ teardown() {
   assert_success
   assert_output_contains "ecdsa-sha2-nistp256"
 
-  run dokku "$PLUGIN_COMMAND_PREFIX:autoadd" --shared "github.com"
+  run dokku "$PLUGIN_COMMAND_PREFIX:delete" --shared "github.com"
+  echo "output: $output"
+  echo "status: $status"
+  assert_success
+  assert_output_contains "Deleted hostkey for github.com as well as the backup"
+}
+
+@test "($PLUGIN_COMMAND_PREFIX:show) shows the app specific hostkeys" {
+  run dokku "$PLUGIN_COMMAND_PREFIX:autoadd" my-app "github.com"
   echo "output: $output"
   echo "status: $status"
   assert_success
 
   run dokku "$PLUGIN_COMMAND_PREFIX:show" my-app
+  echo "output: $output"
+  echo "status: $status"
+  assert_success
+  assert_output_contains "ecdsa-sha2-nistp256"
+}
+
+@test "($PLUGIN_COMMAND_PREFIX:show) shows the shared hostkeys" {
+  run dokku "$PLUGIN_COMMAND_PREFIX:autoadd" --shared "github.com"
+  echo "output: $output"
+  echo "status: $status"
+  assert_success
+
+  run dokku "$PLUGIN_COMMAND_PREFIX:show" --shared
   echo "output: $output"
   echo "status: $status"
   assert_success
@@ -83,6 +104,17 @@ teardown() {
   echo "status: $status"
   assert_success
 
+  run dokku git:sync --build my-app https://github.com/dokku/smoke-test-app.git
+  echo "output: $output"
+  echo "status: $status"
+  assert_success
+  assert_output_contains "Adding host-keys to build environment"
+  assert_output_contains "Adding app specific keys"
+  assert_output_contains "Adding shared keys" 0
+  assert_output_contains "Transferring ssh_known_hosts to container"
+}
+
+@test "($PLUGIN_COMMAND_PREFIX:deploy) ensure the shared key is baked into the container" {
   run dokku "$PLUGIN_COMMAND_PREFIX:autoadd" --shared "github.com"
   echo "output: $output"
   echo "status: $status"
@@ -93,7 +125,7 @@ teardown() {
   echo "status: $status"
   assert_success
   assert_output_contains "Adding host-keys to build environment"
-  assert_output_contains "Adding app specific keys"
+  assert_output_contains "Adding app specific keys" 0
   assert_output_contains "Adding shared keys"
   assert_output_contains "Transferring ssh_known_hosts to container"
 }
