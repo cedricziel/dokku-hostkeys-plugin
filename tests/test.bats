@@ -7,6 +7,7 @@ setup() {
 
 teardown() {
   echo "" >"/home/dokku/.hostkeys/shared/.ssh/known_hosts"
+  chown dokku:dokku "/home/dokku/.hostkeys/shared/.ssh/known_hosts"
   dokku --force apps:destroy my-app || true
 }
 
