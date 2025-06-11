@@ -35,6 +35,8 @@ fn-hostkeys-add-shared-key() {
 fn-hostkeys-autoadd-app-key() {
   declare desc="Autoadds a hostkey to the app"
   declare APP="$1" HOSTNAME="$2"
+  local APP_SPECIFIC_HOSTKEYS_FOLDER="$DOKKU_ROOT/.hostkeys/$APP/.ssh"
+  local APP_SPECIFIC_HOSTKEYS_FILE="$APP_SPECIFIC_HOSTKEYS_FOLDER/known_hosts"
 
   fn-hostkeys-check-install-app "$APP"
   if [[ -n "$HOSTNAME" ]]; then
@@ -48,6 +50,8 @@ fn-hostkeys-autoadd-app-key() {
 fn-hostkeys-autoadd-shared-key() {
   declare desc="Autoadds a shared hostkey"
   declare HOSTNAME="$1"
+  local SHARED_HOSTKEYS_FOLDER="$DOKKU_ROOT/.hostkeys/shared/.ssh"
+  local SHARED_HOSTKEYS_FILE="$SHARED_HOSTKEYS_FOLDER/known_hosts"
 
   fn-hostkeys-check-install
   if [[ -n "$HOSTNAME" ]]; then
