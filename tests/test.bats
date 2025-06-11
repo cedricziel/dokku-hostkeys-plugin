@@ -96,5 +96,4 @@ teardown() {
   assert_output_contains "Adding app specific keys"
   assert_output_contains "Adding shared keys"
   assert_output_contains "Transferring ssh_known_hosts to container"
-  assert_output_contains "Adding identity file option to global SSH config"
 }

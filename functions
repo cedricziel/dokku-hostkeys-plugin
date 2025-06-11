@@ -97,7 +97,7 @@ fn-hostkeys-check-install-app() {
   fi
 }
 
-fn-hostkeys-delete-app-keys() {
+fn-hostkeys-delete-app-key() {
   declare desc="Deletes a hostkey from the app"
   declare APP="$1" HOSTNAME="$2"
   local APP_SPECIFIC_HOSTKEYS_FOLDER="$DOKKU_ROOT/.hostkeys/$APP/.ssh"
