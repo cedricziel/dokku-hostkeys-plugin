@@ -56,7 +56,7 @@ teardown() {
   echo "output: $output"
   echo "status: $status"
   assert_success
-  assert_output_contains "ecdsa-sha2-nistp256"
+  assert_output_contains "ecdsa-sha2-nistp256" 2
 
   run dokku "$PLUGIN_COMMAND_PREFIX:delete" my-app "github.com"
   echo "output: $output"
@@ -75,7 +75,7 @@ teardown() {
   echo "output: $output"
   echo "status: $status"
   assert_success
-  assert_output_contains "ecdsa-sha2-nistp256"
+  assert_output_contains "ecdsa-sha2-nistp256" 2
 
   run dokku "$PLUGIN_COMMAND_PREFIX:delete" --shared "github.com"
   echo "output: $output"
@@ -94,7 +94,7 @@ teardown() {
   echo "output: $output"
   echo "status: $status"
   assert_success
-  assert_output_contains "ecdsa-sha2-nistp256"
+  assert_output_contains "ecdsa-sha2-nistp256" 2
 }
 
 @test "($PLUGIN_COMMAND_PREFIX:show) shows the shared hostkeys" {
@@ -107,7 +107,7 @@ teardown() {
   echo "output: $output"
   echo "status: $status"
   assert_success
-  assert_output_contains "ecdsa-sha2-nistp256"
+  assert_output_contains "ecdsa-sha2-nistp256" 2
 }
 
 @test "($PLUGIN_COMMAND_PREFIX:deploy) ensure the app-specific key is baked into the container" {
