@@ -18,6 +18,10 @@ autoadd-cmd() {
   [[ ${argv[0]} == "$cmd" ]] && shift 1
   declare APP="$1" HOSTNAME="$2"
 
+  if [[ -z "$HOSTNAME" ]]; then
+    dokku_log_fail "Please specify a hostname to autoadd"
+  fi
+
   if [[ "$APP" == "--shared" ]]; then
     fn-hostkeys-autoadd-shared-key "$HOSTNAME"
   else
