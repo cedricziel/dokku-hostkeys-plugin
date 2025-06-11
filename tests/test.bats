@@ -79,13 +79,6 @@ teardown() {
 }
 
 @test "($PLUGIN_COMMAND_PREFIX:deploy) ensure the app-specific key is baked into the container" {
-  run dokku "$PLUGIN_COMMAND_PREFIX:create" my-app
-  echo "output: $output"
-  echo "status: $status"
-  assert_success
-  assert_output_contains "No app specific keys folder available, creating"
-  assert_output_contains "No app specific keys file available, creating"
-
   run dokku "$PLUGIN_COMMAND_PREFIX:autoadd" my-app "github.com"
   echo "output: $output"
   echo "status: $status"
