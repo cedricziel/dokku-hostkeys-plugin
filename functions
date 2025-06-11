@@ -9,12 +9,8 @@ fn-hostkeys-add-app-key() {
   local APP_SPECIFIC_HOSTKEYS_FILE="$APP_SPECIFIC_HOSTKEYS_FOLDER/known_hosts"
 
   fn-hostkeys-check-install-app "$APP"
-  if [[ -n "$HOSTKEY" ]]; then
-    echo "$HOSTKEY" >>"$APP_SPECIFIC_HOSTKEYS_FILE"
-    dokku_log_verbose_quiet "Added $HOSTKEY to the list of app specific hostkeys"
-  else
-    dokku_log_fail "Empty argument. Try again."
-  fi
+  echo "$HOSTKEY" >>"$APP_SPECIFIC_HOSTKEYS_FILE"
+  dokku_log_verbose_quiet "Added $HOSTKEY to the list of app specific hostkeys"
 }
 
 fn-hostkeys-add-shared-key() {
@@ -24,12 +20,8 @@ fn-hostkeys-add-shared-key() {
   local SHARED_HOSTKEYS_FILE="$SHARED_HOSTKEYS_FOLDER/known_hosts"
 
   fn-hostkeys-check-install
-  if [[ -n "$HOSTKEY" ]]; then
-    echo "$HOSTKEY" >>"$SHARED_HOSTKEYS_FILE"
-    dokku_log_verbose_quiet "Added $HOSTKEY to the list of shared hostkeys"
-  else
-    dokku_log_fail "Empty argument. Try again."
-  fi
+  echo "$HOSTKEY" >>"$SHARED_HOSTKEYS_FILE"
+  dokku_log_verbose_quiet "Added $HOSTKEY to the list of shared hostkeys"
 }
 
 fn-hostkeys-autoadd-app-key() {
@@ -39,12 +31,8 @@ fn-hostkeys-autoadd-app-key() {
   local APP_SPECIFIC_HOSTKEYS_FILE="$APP_SPECIFIC_HOSTKEYS_FOLDER/known_hosts"
 
   fn-hostkeys-check-install-app "$APP"
-  if [[ -n "$HOSTNAME" ]]; then
-    ssh-keyscan -H "$HOSTNAME" >>"$APP_SPECIFIC_HOSTKEYS_FILE" 2>/dev/null
-    dokku_log_verbose_quiet "Added keys for $HOSTNAME"
-  else
-    dokku_log_fail "Please enter the name of the host as argument"
-  fi
+  ssh-keyscan -H "$HOSTNAME" >>"$APP_SPECIFIC_HOSTKEYS_FILE" 2>/dev/null
+  dokku_log_verbose_quiet "Added keys for $HOSTNAME"
 }
 
 fn-hostkeys-autoadd-shared-key() {
@@ -54,12 +42,8 @@ fn-hostkeys-autoadd-shared-key() {
   local SHARED_HOSTKEYS_FILE="$SHARED_HOSTKEYS_FOLDER/known_hosts"
 
   fn-hostkeys-check-install
-  if [[ -n "$HOSTNAME" ]]; then
-    ssh-keyscan -H "$HOSTNAME" >>"$SHARED_HOSTKEYS_FILE" 2>/dev/null
-    dokku_log_verbose_quiet "Added keys for $HOSTNAME"
-  else
-    dokku_log_fail "Please enter the name of the host as argument"
-  fi
+  ssh-keyscan -H "$HOSTNAME" >>"$SHARED_HOSTKEYS_FILE" 2>/dev/null
+  dokku_log_verbose_quiet "Added keys for $HOSTNAME"
 }
 
 fn-hostkeys-check-install() {
@@ -139,14 +123,14 @@ fn-hostkeys-print-keys-for-app() {
 
   fn-hostkeys-check-install-app "$APP"
   fn-hostkeys-print-shared-keys
-  cat <<EOF
+  if [[ ! -s "$APP_SPECIFIC_HOSTKEYS_FILE" ]]; then
+    dokku_log_exclaim "No app-specific keys registered"
+  else
+    cat <<EOF
 
 The following APP SPECIFIC hostkeys have been registered:
 ---------------------------------------------------------
 EOF
-  if [[ ! -s "$APP_SPECIFIC_HOSTKEYS_FILE" ]]; then
-    dokku_log_fail "No keys registered. Use dokku 'hostkeys:app:add <key>' to add one."
-  else
     cat "$APP_SPECIFIC_HOSTKEYS_FILE"
   fi
 }
@@ -158,13 +142,13 @@ fn-hostkeys-print-shared-keys() {
 
   fn-hostkeys-check-install
 
-  cat <<EOF
+  if [[ ! -s "$SHARED_HOSTKEYS_FILE" ]]; then
+    dokku_log_exclaim "No shared keys registered"
+  else
+    cat <<EOF
 The following SHARED hostkeys have been registered:
 ---------------------------------------------------
 EOF
-  if [[ ! -s "$SHARED_HOSTKEYS_FILE" ]]; then
-    dokku_log_fail "No keys registered. Use dokku 'hostkeys:add --shared <key>' to add one."
-  else
     cat "$SHARED_HOSTKEYS_FILE"
   fi
 }
