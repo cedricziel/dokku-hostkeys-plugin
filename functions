@@ -1,0 +1,163 @@
+#!/usr/bin/env bash
+set -eo pipefail
+[[ $DOKKU_TRACE ]] && set -x
+
+fn-hostkeys-add-app-key() {
+  declare desc="Adds a hostkey to the app"
+  declare APP="$1" HOSTKEY="$2"
+  fn-hostkeys-check-install-app "$APP"
+  if [[ -n "$HOSTKEY" ]]; then
+    echo "$HOSTKEY" >>"$APP_SPECIFIC_HOSTKEYS_FILE"
+    echo "Added $HOSTKEY to the list of shared hostkeys"
+  else
+    dokku_log_fail "Empty argument. Try again."
+  fi
+}
+
+fn-hostkeys-add-shared-key() {
+  declare desc="Adds a shared hostkey"
+  declare HOSTKEY="$1"
+  local SHARED_HOSTKEYS_FOLDER="$DOKKU_ROOT/.hostkeys/shared/.ssh"
+  local SHARED_HOSTKEYS_FILE="$SHARED_HOSTKEYS_FOLDER/known_hosts"
+
+  fn-hostkeys-check-install
+  if [[ -n "$HOSTKEY" ]]; then
+    echo "$HOSTKEY" >>"$SHARED_HOSTKEYS_FILE"
+    echo "Added $HOSTKEY to the list of shared hostkeys"
+  else
+    dokku_log_fail "Empty argument. Try again."
+  fi
+}
+
+fn-hostkeys-autoadd-app-key() {
+  declare desc="Autoadds a hostkey to the app"
+  declare APP="$1" HOSTNAME="$2"
+
+  fn-hostkeys-check-install-app "$APP"
+  if [[ -n "$HOSTNAME" ]]; then
+    ssh-keyscan -H "$HOSTNAME" >>"$APP_SPECIFIC_HOSTKEYS_FILE"
+    echo "Added keys for $HOSTNAME"
+  else
+    dokku_log_fail "Please enter the name of the host as argument"
+  fi
+}
+
+fn-hostkeys-autoadd-shared-key() {
+  declare desc="Autoadds a shared hostkey"
+  declare HOSTNAME="$1"
+
+  fn-hostkeys-check-install
+  if [[ -n "$HOSTNAME" ]]; then
+    ssh-keyscan -H "$HOSTNAME" >>"$SHARED_HOSTKEYS_FILE"
+    echo "Added keys for $HOSTNAME"
+  else
+    dokku_log_fail "Please enter the name of the host as argument"
+  fi
+}
+
+fn-hostkeys-check-install() {
+  declare desc="Checks if the shared hostkeys are installed"
+  local SHARED_HOSTKEYS_FOLDER="$DOKKU_ROOT/.hostkeys/shared/.ssh"
+  local SHARED_HOSTKEYS_FILE="$SHARED_HOSTKEYS_FOLDER/known_hosts"
+
+  if [[ ! -d "$SHARED_HOSTKEYS_FOLDER" ]]; then
+    dokku_log_fail "No shared keys folder available. Did you run 'dokku plugins-install'? Exiting."
+  fi
+
+  if [[ ! -f "$SHARED_HOSTKEYS_FILE" ]]; then
+    dokku_log_fail "No shared keys file available. Did you run 'dokku plugins-install'? Exiting."
+  fi
+}
+
+fn-hostkeys-check-install-app() {
+  declare desc="Checks if the app specific hostkeys are installed"
+  declare APP="$1"
+  local APP_SPECIFIC_HOSTKEYS_FOLDER="$DOKKU_ROOT/.hostkeys/$APP/.ssh"
+  local APP_SPECIFIC_HOSTKEYS_FILE="$APP_SPECIFIC_HOSTKEYS_FOLDER/known_hosts"
+
+  if [[ ! -d "$APP_SPECIFIC_HOSTKEYS_FOLDER" ]]; then
+    echo "No app specific keys folder available. creating.."
+    mkdir -p "$APP_SPECIFIC_HOSTKEYS_FOLDER"
+    chmod 700 "$APP_SPECIFIC_HOSTKEYS_FOLDER"
+    chown -R dokku:dokku "$DOKKU_ROOT/.hostkeys/$APP"
+  fi
+
+  if [[ ! -f "$APP_SPECIFIC_HOSTKEYS_FILE" ]]; then
+    echo "No app specific keys file available. creating.."
+    touch "$APP_SPECIFIC_HOSTKEYS_FILE"
+    chmod 644 "$APP_SPECIFIC_HOSTKEYS_FILE"
+    chown -R dokku:dokku "$DOKKU_ROOT/.hostkeys/$APP"
+  fi
+}
+
+fn-hostkeys-delete-app-keys() {
+  declare desc="Deletes a hostkey from the app"
+  declare APP="$1" HOSTNAME="$2"
+  local APP_SPECIFIC_HOSTKEYS_FOLDER="$DOKKU_ROOT/.hostkeys/$APP/.ssh"
+  local APP_SPECIFIC_HOSTKEYS_FILE="$APP_SPECIFIC_HOSTKEYS_FOLDER/known_hosts"
+
+  fn-hostkeys-check-install-app "$APP"
+  if [[ -n "$HOSTNAME" ]]; then
+    ssh-keygen -f "$APP_SPECIFIC_HOSTKEYS_FILE" -R "$HOSTNAME"
+    rm "$APP_SPECIFIC_HOSTKEYS_FOLDER/known_hosts.old"
+    echo "Deleted hostkey for $HOSTNAME as well as the backup."
+  else
+    echo "" >"$APP_SPECIFIC_HOSTKEYS_FILE"
+    echo "Emptied the app specific hostkey file. Your app looses the specific keys on the next push. Make sure you add the required ones"
+  fi
+}
+
+fn-hostkeys-delete-shared-key() {
+  declare desc="Deletes a shared hostkey"
+  declare HOSTNAME="$1"
+  local SHARED_HOSTKEYS_FOLDER="$DOKKU_ROOT/.hostkeys/shared/.ssh"
+  local SHARED_HOSTKEYS_FILE="$SHARED_HOSTKEYS_FOLDER/known_hosts"
+
+  fn-hostkeys-check-install
+  if [[ -n "$HOSTNAME" ]]; then
+    ssh-keygen -f "$SHARED_HOSTKEYS_FILE" -R "$HOSTNAME"
+    rm "$SHARED_HOSTKEYS_FOLDER/known_hosts.old"
+    echo "Deleted hostkey for $HOSTNAME as well as the backup."
+  else
+    echo "" >"$SHARED_HOSTKEYS_FILE"
+    echo "Emptied the shared hostkey file. All apps will loose the shared keys on next push. Make sure you add the required ones"
+  fi
+}
+
+fn-hostkeys-print-keys-for-app() {
+  declare desc="Prints the app specific hostkeys"
+  declare APP="$1"
+  local APP_SPECIFIC_HOSTKEYS_FOLDER="$DOKKU_ROOT/.hostkeys/$APP/.ssh"
+  local APP_SPECIFIC_HOSTKEYS_FILE="$APP_SPECIFIC_HOSTKEYS_FOLDER/known_hosts"
+
+  fn-hostkeys-check-install-app "$APP"
+  fn-hostkeys-print-shared-keys
+  cat <<EOF
+
+The following APP SPECIFIC hostkeys have been registered:
+---------------------------------------------------------
+EOF
+  if [[ ! -s "$APP_SPECIFIC_HOSTKEYS_FILE" ]]; then
+    dokku_log_fail "No keys registered. Use dokku 'hostkeys:app:add <key>' to add one."
+  else
+    cat "$APP_SPECIFIC_HOSTKEYS_FILE"
+  fi
+}
+
+fn-hostkeys-print-shared-keys() {
+  declare desc="Prints the shared hostkeys"
+  local SHARED_HOSTKEYS_FOLDER="$DOKKU_ROOT/.hostkeys/shared/.ssh"
+  local SHARED_HOSTKEYS_FILE="$SHARED_HOSTKEYS_FOLDER/known_hosts"
+
+  fn-hostkeys-check-install
+
+  cat <<EOF
+The following SHARED hostkeys have been registered:
+---------------------------------------------------
+EOF
+  if [[ ! -s "$SHARED_HOSTKEYS_FILE" ]]; then
+    dokku_log_fail "No keys registered. Use dokku 'hostkeys:shared:add <key>' to add one."
+  else
+    cat "$SHARED_HOSTKEYS_FILE"
+  fi
+}

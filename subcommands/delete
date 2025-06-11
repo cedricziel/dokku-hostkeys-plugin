@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+source "$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)")/config"
+set -eo pipefail
+[[ $DOKKU_TRACE ]] && set -x
+source "$PLUGIN_CORE_AVAILABLE_PATH/common/functions"
+source "$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)")/functions"
+
+delete-cmd() {
+  #E deletes a hostkey from the app
+  #E dokku $PLUGIN_COMMAND_PREFIX:delete my-app some-key-for-github.com
+  #E delete a hostkey from the shared hostkeys
+  #E dokku $PLUGIN_COMMAND_PREFIX:delete --shared some-key-for-github.com
+  #A app, app to run command against
+  #A hostname, hostname to delete
+  #F --shared, show the shared hostkeys
+  declare desc="deletes a hostkey from the app"
+  local cmd="$PLUGIN_COMMAND_PREFIX:status" argv=("$@")
+  [[ ${argv[0]} == "$cmd" ]] && shift 1
+  declare APP="$1" HOSTNAME="$2"
+
+  if [[ "$APP" == "--shared" ]]; then
+    fn-hostkeys-delete-shared-key "$HOSTNAME"
+  else
+    [[ -z "$APP" ]] && dokku_log_fail "Please specify an app to run the command on"
+    verify_app_name "$APP"
+    fn-hostkeys-delete-app-key "$APP" "$HOSTNAME"
+  fi
+
+}
+
+delete-cmd "$@"

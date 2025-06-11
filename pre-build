@@ -1,47 +1,101 @@
 #!/usr/bin/env bash
-set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+set -eo pipefail
+[[ $DOKKU_TRACE ]] && set -x
 source "$PLUGIN_ENABLED_PATH/common/functions"
-BUILDER_TYPE="$1" APP="$2"
-if [[ "$BUILDER_TYPE" != "herokuish" ]]; then
-  exit 0
-fi
-IMAGE=$(get_app_image_name $APP)
 
-APP_SPECIFIC_KEY_FOLDER="$DOKKU_ROOT/.hostkeys/$APP/.ssh"
-SHARED_KEY_FOLDER="$DOKKU_ROOT/.hostkeys/shared/.ssh"
-bash $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/install
-[[ ! -f "$APP_SPECIFIC_KEY_FOLDER/known_hosts" ]] && [[ ! -f "$SHARED_KEY_FOLDER/known_hosts" ]] && return
-
-dokku_log_info1 "Adding host-keys to build environment ..."
-
-KNOWN_HOSTS_COMBINED=""
-
-if [[ -f "$APP_SPECIFIC_KEY_FOLDER/known_hosts" ]]; then
-  KNOWN_HOSTS_COMBINED=$(cat "$APP_SPECIFIC_KEY_FOLDER/known_hosts")
-  dokku_log_verbose_quiet "Adding app specific keys"
-fi
-
-if [[ -f "$SHARED_KEY_FOLDER/known_hosts" ]]; then
-  dokku_log_verbose_quiet "Adding shared keys"
-  if ([[ -z "$KNOWN_HOSTS_COMBINED" ]]); then
-    KNOWN_HOSTS_COMBINED="$KNOWN_HOSTS_COMBINED"$(cat "$SHARED_KEY_FOLDER/known_hosts")
-  else
-    KNOWN_HOSTS_COMBINED="$KNOWN_HOSTS_COMBINED"$'\n'$(cat "$SHARED_KEY_FOLDER/known_hosts")
+trigger-hostkeys-pre-build() {
+  declare desc="adds the hostkeys to the build environment"
+  declare trigger="pre-build"
+  declare BUILDER_TYPE="$1" APP="$2"
+  if [[ "$BUILDER_TYPE" != "herokuish" ]]; then
+    return
   fi
-fi
 
-if [[ ! -z "$KNOWN_HOSTS_COMBINED" ]]; then
+  IMAGE=$(get_app_image_name "$APP")
+
+  APP_SPECIFIC_KEY_FOLDER="$DOKKU_ROOT/.hostkeys/$APP/.ssh"
+  SHARED_KEY_FOLDER="$DOKKU_ROOT/.hostkeys/shared/.ssh"
+
+  bash "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/install"
+  [[ ! -f "$APP_SPECIFIC_KEY_FOLDER/known_hosts" ]] && [[ ! -f "$SHARED_KEY_FOLDER/known_hosts" ]] && return
+
+  dokku_log_info1 "Adding host-keys to build environment ..."
+
+  KNOWN_HOSTS_COMBINED=""
+
+  if [[ -f "$APP_SPECIFIC_KEY_FOLDER/known_hosts" ]]; then
+    KNOWN_HOSTS_COMBINED=$(cat "$APP_SPECIFIC_KEY_FOLDER/known_hosts")
+    dokku_log_verbose_quiet "Adding app specific keys"
+  fi
+
+  if [[ -f "$SHARED_KEY_FOLDER/known_hosts" ]]; then
+    dokku_log_verbose_quiet "Adding shared keys"
+    if ([[ -z "$KNOWN_HOSTS_COMBINED" ]]); then
+      KNOWN_HOSTS_COMBINED="$KNOWN_HOSTS_COMBINED"$(cat "$SHARED_KEY_FOLDER/known_hosts")
+    else
+      KNOWN_HOSTS_COMBINED="$KNOWN_HOSTS_COMBINED"$'\n'$(cat "$SHARED_KEY_FOLDER/known_hosts")
+    fi
+  fi
+
+  if [[ -z "$KNOWN_HOSTS_COMBINED" ]]; then
+    return
+  fi
+
+  TMP_WORK_DIR=$(mktemp -d "/tmp/dokku-${DOKKU_PID}-${FUNCNAME[0]}.XXXXXX")
+  CID_FILE="$(mktemp -u "/tmp/dokku-${DOKKU_PID}-${FUNCNAME[0]}.XXXXXX")"
+  # shellcheck disable=SC2064
+  trap "rm -rf '$TMP_WORK_DIR' '$CID_FILE' >/dev/null" RETURN
+
   # 1. Create the .ssh folder
-  id=$(docker run $DOKKU_GLOBAL_RUN_ARGS -d $IMAGE /bin/bash -c "mkdir -p -m 700 /app/.ssh")
-  test $(docker wait $id) -eq 0
-  docker commit $id $IMAGE > /dev/null
+  # shellcheck disable=SC2086
+  "$DOCKER_BIN" container run $DOKKU_GLOBAL_RUN_ARGS -d --cidfile="$CID_FILE" "$IMAGE" /bin/bash -c "mkdir -p -m 700 /app/.ssh"
+  CID="$(cat "$CID_FILE")"
+  rm -f "$CID_FILE"
+  if [[ -z "$CID" ]]; then
+    dokku_log_warn "Failure creating app specific private key image"
+    return 1
+  fi
+
+  if test "$("$DOCKER_BIN" container wait "$CID")" -ne 0; then
+    dokku_log_warn "Failure creating .ssh folder"
+    return 1
+  fi
+
+  "$DOCKER_BIN" container commit "$CID" "$IMAGE" >/dev/null
 
   # 2. Transfer the keyfile to the container
-  idWithKeys=$(echo -e "$KNOWN_HOSTS_COMBINED" | docker run $DOKKU_GLOBAL_RUN_ARGS -i -a stdin $IMAGE /bin/bash -c "cat >> /etc/ssh/ssh_known_hosts && chmod 644 /etc/ssh/ssh_known_hosts")
-  test $(docker wait $idWithKeys) -eq 0
-  docker commit $idWithKeys $IMAGE > /dev/null
+  dokku_log_verbose_quiet "Transferring keyfile to container"
+  # shellcheck disable=SC2086
+  echo -e "$KNOWN_HOSTS_COMBINED" | "$DOCKER_BIN" container run $DOKKU_GLOBAL_RUN_ARGS --cidfile="$CID_FILE" -i -a stdin "$IMAGE" /bin/bash -c "cat >> /etc/ssh/ssh_known_hosts && chmod 644 /etc/ssh/ssh_known_hosts"
+  CID="$(cat "$CID_FILE")"
+  rm -f "$CID_FILE"
+  if [[ -z "$CID" ]]; then
+    dokku_log_warn "Failure creating hostkey transfer image"
+    return 1
+  fi
 
-  idWithConfig=$(echo "UserKnownHostsFile /etc/ssh/ssh_known_hosts" | docker run $DOKKU_GLOBAL_RUN_ARGS -i -a stdin $IMAGE /bin/bash -c "cat >> /etc/ssh/ssh_config" )
-  test $(docker wait $idWithConfig) -eq 0
-  docker commit $idWithConfig $IMAGE > /dev/null
-fi
+  if test "$("$DOCKER_BIN" container wait "$CID")" -ne 0; then
+    dokku_log_warn "Failure transferring hostkey"
+    return 1
+  fi
+
+  "$DOCKER_BIN" container commit "$CID" "$IMAGE" >/dev/null
+
+  # shellcheck disable=SC2086
+  echo "UserKnownHostsFile /etc/ssh/ssh_known_hosts" | "$DOCKER_BIN" container run $DOKKU_GLOBAL_RUN_ARGS --cidfile="$CID_FILE" -i -a stdin "$IMAGE" /bin/bash -c "cat >> /etc/ssh/ssh_config"
+  CID="$(cat "$CID_FILE")"
+  rm -f "$CID_FILE"
+  if [[ -z "$CID" ]]; then
+    dokku_log_warn "Failure creating ssh_known_hosts image"
+    return 1
+  fi
+
+  if test "$("$DOCKER_BIN" container wait "$CID")" -ne 0; then
+    dokku_log_warn "Failure creating ssh_known_hosts file"
+    return 1
+  fi
+
+  "$DOCKER_BIN" container commit "$CID" "$IMAGE" >/dev/null
+}
+
+trigger-hostkeys-pre-build "$@"

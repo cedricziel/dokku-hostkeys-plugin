@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+source "$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)")/config"
+set -eo pipefail
+[[ $DOKKU_TRACE ]] && set -x
+source "$PLUGIN_CORE_AVAILABLE_PATH/common/functions"
+source "$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)")/functions"
+
+add-cmd() {
+  #E adds a hostkey to the app
+  #E dokku $PLUGIN_COMMAND_PREFIX:add my-app some-key-for-github.com
+  #E add a hostkey to the shared hostkeys
+  #E dokku $PLUGIN_COMMAND_PREFIX:add --shared some-key-for-github.com
+  #A app, app to run command against
+  #A hostkey, hostkey to add
+  #F --shared, show the shared hostkeys
+  declare desc="adds a hostkey to the app"
+  local cmd="$PLUGIN_COMMAND_PREFIX:status" argv=("$@")
+  [[ ${argv[0]} == "$cmd" ]] && shift 1
+  declare APP="$1" HOSTKEY="$2"
+
+  if [[ "$APP" == "--shared" ]]; then
+    fn-hostkeys-add-shared-key "$HOSTKEY"
+  else
+    [[ -z "$APP" ]] && dokku_log_fail "Please specify an app to run the command on"
+    verify_app_name "$APP"
+    fn-hostkeys-add-app-key "$APP" "$HOSTKEY"
+  fi
+
+}
+
+add-cmd "$@"
