@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -eo pipefail
+[[ $DOKKU_TRACE ]] && set -x
+source "$PLUGIN_ENABLED_PATH/common/functions"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/functions"
+
+trigger-hostkeys-post-create() {
+  declare desc="adds the hostkeys to the app"
+  declare trigger="post-create"
+  declare APP="$1"
+
+  fn-hostkeys-check-install-app "$APP"
+}
+
+trigger-hostkeys-post-create "$@"
