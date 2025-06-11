@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+source "$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)")/config"
+set -eo pipefail
+[[ $DOKKU_TRACE ]] && set -x
+source "$PLUGIN_CORE_AVAILABLE_PATH/common/functions"
+source "$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)")/functions"
+
+autoadd-cmd() {
+  #E autoadds a hostkey to the app
+  #E dokku $PLUGIN_COMMAND_PREFIX:autoadd my-app github.com
+  #E autoadd a hostkey to the shared hostkeys
+  #E dokku $PLUGIN_COMMAND_PREFIX:autoadd --shared github.com
+  #A app, app to run command against
+  #A hostname, hostname to autoadd
+  #F --shared, show the shared hostkeys
+  declare desc="autoadds a hostkey for the given hostname to the app"
+  local cmd="$PLUGIN_COMMAND_PREFIX:autoadd" argv=("$@")
+  [[ ${argv[0]} == "$cmd" ]] && shift 1
+  declare APP="$1" HOSTNAME="$2"
+
+  if [[ -z "$HOSTNAME" ]]; then
+    dokku_log_fail "Please specify a hostname to autoadd"
+  fi
+
+  if [[ "$APP" == "--shared" ]]; then
+    fn-hostkeys-autoadd-shared-key "$HOSTNAME"
+  else
+    [[ -z "$APP" ]] && dokku_log_fail "Please specify an app to run the command on"
+    verify_app_name "$APP"
+    fn-hostkeys-autoadd-app-key "$APP" "$HOSTNAME"
+  fi
+
+}
+
+autoadd-cmd "$@"

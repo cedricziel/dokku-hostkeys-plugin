@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+source "$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)")/config"
+set -eo pipefail
+[[ $DOKKU_TRACE ]] && set -x
+source "$PLUGIN_CORE_AVAILABLE_PATH/common/functions"
+source "$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)")/functions"
+
+show-cmd() {
+  #E shows the current status of the hostkeys for an app
+  #E dokku $PLUGIN_COMMAND_PREFIX:show my-app
+  #E show the shared hostkeys
+  #E dokku $PLUGIN_COMMAND_PREFIX:show --shared
+  #A app, app to run command against
+  #F --shared, show the shared hostkeys
+  declare desc="shows the current status of the hostkeys for an app"
+  local cmd="$PLUGIN_COMMAND_PREFIX:show" argv=("$@")
+  [[ ${argv[0]} == "$cmd" ]] && shift 1
+  declare APP="$1"
+
+  if [[ "$APP" == "--shared" ]]; then
+    fn-hostkeys-print-shared-keys
+  else
+    [[ -z "$APP" ]] && dokku_log_fail "Please specify an app to run the command on"
+    verify_app_name "$APP"
+    fn-hostkeys-print-keys-for-app "$APP"
+  fi
+
+}
+
+show-cmd "$@"
