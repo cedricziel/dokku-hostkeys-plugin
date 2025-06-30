@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -eo pipefail
 [[ $TRACE ]] && set -x
-set -x
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 762E3157
 echo "deb http://nginx.org/packages/ubuntu $(lsb_release -cs) nginx" | sudo tee /etc/apt/sources.list.d/nginx.list
 curl -fsSL https://nginx.org/keys/nginx_signing.key | sudo apt-key add -
@@ -19,6 +18,7 @@ fi
 echo "Dokku version $DOKKU_VERSION"
 
 export DOKKU_LIB_ROOT="/var/lib/dokku"
+export DOKKU_ROOT="/home/dokku"
 export DOKKU_PLUGINS_ROOT="$DOKKU_LIB_ROOT/plugins/available"
 pushd "$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)")" >/dev/null
 source "config"
