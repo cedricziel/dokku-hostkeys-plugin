@@ -1,16 +1,15 @@
 #!/usr/bin/env bash
 set -eo pipefail
 [[ $DOKKU_TRACE ]] && set -x
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/config"
 
 trigger-hostkeys-install() {
   declare desc="installs the hostkeys"
   declare trigger="install"
 
   SHARED_HOSTKEYS_FOLDER="$DOKKU_ROOT/.hostkeys/shared/.ssh"
-
-  if [[ ! -d "$SHARED_HOSTKEYS_FOLDER" ]]; then
-    mkdir -p "$SHARED_HOSTKEYS_FOLDER"
-  fi
+  mkdir -p "$SHARED_HOSTKEYS_FOLDER"
+  mkdir -p "$PLUGIN_CONFIG_ROOT"
 
   if [[ ! -f "$SHARED_HOSTKEYS_FOLDER/known_hosts" ]]; then
     touch "$SHARED_HOSTKEYS_FOLDER/known_hosts"
