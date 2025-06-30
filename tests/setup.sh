@@ -18,7 +18,6 @@ fi
 echo "Dokku version $DOKKU_VERSION"
 
 export DOKKU_LIB_ROOT="/var/lib/dokku"
-export DOKKU_ROOT="/home/dokku"
 export DOKKU_PLUGINS_ROOT="$DOKKU_LIB_ROOT/plugins/available"
 pushd "$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)")" >/dev/null
 source "config"
